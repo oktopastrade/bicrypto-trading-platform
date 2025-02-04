@@ -23,7 +23,7 @@ port of scylladb when running ecosystem port:
  
 when app finish builds 
 
-#1 IMPORTANT: go to datbase ...table extensions…..coloumn status…. write 1 instead of 0
+# 1 IMPORTANT: go to datbase ...table extensions…..coloumn status…. write 1 instead of 0
 
 2 go to folder public_html run pnpm updator wait until build is finished 
 error may happen to pnpm if your folder node_module have not permission of the user of the cmd
@@ -38,14 +38,14 @@ full source code  https://www.mediafire.com/file/j2l4h962hbofo95/bicrypto+6.4.3+
 
 Bicrypto - Crypto Trading Platform, Exchanges, Kyc, Charting Library, Wallets, Binary Trading
 
-===========================OKX + KRAKEN + BAINANCE US=============================
+=========================== OKX + KRAKEN + BAINANCE US =============================
 
 
 after login with phpMyAdmin select your database
 
 click on sql
 
-#run this sql code without // to create missing coloumns:
+# run this sql code without // to create missing coloumns:
 
 
 //
