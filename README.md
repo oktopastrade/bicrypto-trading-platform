@@ -94,7 +94,7 @@ APP_BINANCEUS_API_SECRET=""
 NB: don't forget this .env
 
 # Exchange first 3 letters of the alias (kucoin, binance, kraken, okx, xt)
-NEXT_PUBLIC_EXCHANGE="ku" you make the changes based on exchange you want
+NEXT_PUBLIC_EXCHANGE="ku" you make the changes based on exchange you want or "bin"
 
 
 
