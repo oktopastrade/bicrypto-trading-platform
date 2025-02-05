@@ -120,6 +120,8 @@ first i have uploaded this file to ecosystem :  ecosystem/smart-contracts
 download it and extract it on ecosystem folder
 
 then i went to database table ecosystem_blockchain changed status from 0 to 1 then you add the vars to your .env file for example :
+
+
 #- Solana Networks (mainnet)
 SOL_NETWORK="mainnet"
 SOL_MAINNET_RPC="https://api.mainnet-beta.solana.com"
