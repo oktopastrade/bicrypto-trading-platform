@@ -113,10 +113,11 @@ my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033
 
 
 # Monero +Sol + Ton + Mo i was able to generate wallets using this method
-first i have uploaded this file to ecosystem :
+first i have uploaded this file to ecosystem :  ecosystem/smart-contracts
 
-    smart-contracts
-    https://github.com/oktopastrade/bicrypto-trading-platform/blob/main/smart-contracts.zip download it and extract it on ecosystem folder
+    https://github.com/oktopastrade/bicrypto-trading-platform/blob/main/smart-contracts.zip
+    
+download it and extract it on ecosystem folder
 
 then i went to database table ecosystem_blockchain changed status from 0 to 1 then you add the vars to your .env file for example :
 #- Solana Networks (mainnet)
