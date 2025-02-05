@@ -119,7 +119,8 @@ first i have uploaded this file to ecosystem :  ecosystem/smart-contracts
     
 download it and extract it on ecosystem folder
 
-then i went to database table ecosystem_blockchain changed status from 0 to 1 then you add the vars to your .env file for example :
+then i went to database table ecosystem_blockchain changed status from 0 to 1 then you add the vars to your .env file for example
+
 
 
 #- Solana Networks (mainnet)
@@ -132,12 +133,15 @@ SOL_TESTNET_RPC_WSS="wss://api.testnet.solana.com"
 SOL_DEVNET_RPC_WSS="wss://api.devnet.solana.com"
 
 
+
 #- MO Networks ( mainnet, testnet )
 MO_NETWORK="mainnet"
 MO_MAINNET_RPC="https://mainnet-rpc.mochain.app/"
 MO_MAINNET_RPC_WSS="wss://mainnet-rpc.mochain.app/ws"
 MO_TESTNET_RPC="https://testnet-rpc.mochain.app/"
 MO_TESTNET_RPC_WSS="wss://testnet-rpc.mochain.app/ws"
+
+
 
 then pnpm updator
 follow the bivrypto documentation to add vars to your .env
