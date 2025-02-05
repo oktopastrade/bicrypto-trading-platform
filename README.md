@@ -24,6 +24,7 @@ port of scylladb when running ecosystem port:
 when app finish builds 
 
 # 1 IMPORTANT: go to datbase ...table extensions…..coloumn status…. write 1 instead of 0
+# if extensions did not show just restart your database server or restart your apache server 
 
 2 go to folder public_html run pnpm updator wait until build is finished 
 error may happen to pnpm if your folder node_module have not permission of the user of the cmd
