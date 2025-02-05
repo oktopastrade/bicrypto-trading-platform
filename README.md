@@ -122,6 +122,28 @@ download it and extract it on ecosystem folder
 then i went to database table ecosystem_blockchain changed status from 0 to 1 then you add the vars to your .env file for example
 
 
+<h2 align="center">Solana Networks (mainnet)</h2>
+<p align="center">
+SOL_NETWORK="mainnet"<br>
+SOL_MAINNET_RPC="https://api.mainnet-beta.solana.com"<br>
+SOL_TESTNET_RPC="https://api.testnet.solana.com"<br>
+SOL_DEVNET_RPC="https://api.devnet.solana.com"<br>
+SOL_MAINNET_RPC_WSS="wss://api.mainnet-beta.solana.com"<br>
+SOL_TESTNET_RPC_WSS="wss://api.testnet.solana.com"<br>
+SOL_DEVNET_RPC_WSS="wss://api.devnet.solana.com"
+</p>
+
+<h2 align="center">MO Networks (mainnet, testnet)</h2>
+<p align="center">
+MO_NETWORK="mainnet"<br>
+MO_MAINNET_RPC="https://mainnet-rpc.mochain.app/"<br>
+MO_MAINNET_RPC_WSS="wss://mainnet-rpc.mochain.app/ws"<br>
+MO_TESTNET_RPC="https://testnet-rpc.mochain.app/"<br>
+MO_TESTNET_RPC_WSS="wss://testnet-rpc.mochain.app/ws"
+</p>
+
+
+
 
 #- Solana Networks (mainnet)
 SOL_NETWORK="mainnet"
