@@ -109,3 +109,37 @@ pnpm updator
 NB: for binance us i am not sure if the script still supporting it i Don't have binance
 
 my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033
+
+
+
+# Monero +Sol + Ton + Mo i was able to generate wallets using this method
+first i have uploaded this file to ecosystem :
+
+    smart-contracts
+    https://github.com/oktopastrade/bicrypto-trading-platform/blob/main/smart-contracts.zip download it and extract it on ecosystem folder
+
+then i went to database table ecosystem_blockchain changed status from 0 to 1 then you add the vars to your .env file for example :
+# Solana Networks (mainnet)
+SOL_NETWORK="mainnet"
+SOL_MAINNET_RPC="https://api.mainnet-beta.solana.com"
+SOL_TESTNET_RPC="https://api.testnet.solana.com"
+SOL_DEVNET_RPC="https://api.devnet.solana.com"
+SOL_MAINNET_RPC_WSS="wss://api.mainnet-beta.solana.com"
+SOL_TESTNET_RPC_WSS="wss://api.testnet.solana.com"
+SOL_DEVNET_RPC_WSS="wss://api.devnet.solana.com"
+
+
+# MO Networks ( mainnet, testnet )
+MO_NETWORK="mainnet"
+MO_MAINNET_RPC="https://mainnet-rpc.mochain.app/"
+MO_MAINNET_RPC_WSS="wss://mainnet-rpc.mochain.app/ws"
+MO_TESTNET_RPC="https://testnet-rpc.mochain.app/"
+MO_TESTNET_RPC_WSS="wss://testnet-rpc.mochain.app/ws"
+
+then pnpm updator
+follow the bivrypto documentation to add vars to your .env
+
+
+for the files they are in bicrypto 4.6.3 on /home/cloudpower/public_html/backend/blockchains/
+for the xmr i can not find it on dev documentation but you can figure the vars from the file /home/cloudpower/public_html/backend/blockchains/xmr.ts search for process.env and add them and i think it depends on redis i dont know if you have to host your own node using it just give it a try .
+for people who already has bicrypto and just uploaded but can not see them even after changing 0 to 1 because you are missing a file you will find it on /home/cloudpower/public_html/scripts/merge.mjs as it is important in builds it merge the extensions on build pages just copy it from the zip file to your script folder and extensions will show
