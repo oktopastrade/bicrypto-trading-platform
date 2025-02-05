@@ -68,7 +68,7 @@ INSERT INTO exchange (id, name, title, status, username, licenseStatus, version,
 YOU will see exchanges Added now go to your .env file and add your vars:
 
 
-# okx API (alias: okx)
+#- okx API (alias: okx)
 
 APP_OKX_API_KEY=""
 
@@ -78,14 +78,14 @@ APP_OKX_API_PASSPHRASE="XXXXX"
 
 
 
-# kraken API (alias: kraken)
+#- kraken API (alias: kraken)
 
 APP_KRAKEN_API_KEY=""
 
 APP_KRAKEN_API_SECRET=""
 
 
-# Binance API (alias: binanceus)
+#- Binance API (alias: binanceus)
 
 APP_BINANCEUS_API_KEY=""
 
@@ -94,7 +94,7 @@ APP_BINANCEUS_API_SECRET=""
 
 NB: don't forget this .env
 
-# Exchange first 3 letters of the alias (kucoin, binance, kraken, okx, xt)
+#- Exchange first 3 letters of the alias (kucoin, binance, kraken, okx, xt)
 NEXT_PUBLIC_EXCHANGE="ku" you make the changes based on exchange you want or "bin"
 
 
