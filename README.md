@@ -149,6 +149,6 @@ then pnpm updator
 follow the bivrypto documentation to add vars to your .env
 
 
-for the files they are in bicrypto 4.6.3 on /home/cloudpower/public_html/backend/blockchains/
-for the xmr i can not find it on dev documentation but you can figure the vars from the file /home/cloudpower/public_html/backend/blockchains/xmr.ts search for process.env and add them and i think it depends on redis i dont know if you have to host your own node using it just give it a try .
-for people who already has bicrypto and just uploaded but can not see them even after changing 0 to 1 because you are missing a file you will find it on /home/cloudpower/public_html/scripts/merge.mjs as it is important in builds it merge the extensions on build pages just copy it from the zip file to your script folder and extensions will show
+for the files they are in bicrypto 4.6.3 on /backend/blockchains/
+for the xmr i can not find it on dev documentation but you can figure the vars from the file /backend/blockchains/xmr.ts search for process.env and add them and i think it depends on redis i dont know if you have to host your own node using it just give it a try .
+for people who already has bicrypto and just uploaded but can not see them even after changing 0 to 1 because you are missing a file you will find it on  /scripts/merge.mjs as it is important in builds it merge the extensions on build pages just copy it from the zip file to your script folder and extensions will show
