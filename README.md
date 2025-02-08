@@ -27,6 +27,7 @@ when app finish builds
 # if extensions did not show just restart your database server or restart your apache server 
 
 if your extensions did not show add this file merge.mjs to folder scripts/merge.mjs
+https://github.com/oktopastrade/bicrypto-trading-platform/blob/main/merge.mjs
 
 2 go to folder public_html run pnpm updator wait until build is finished 
 error may happen to pnpm if your folder node_module have not permission of the user of the cmd
