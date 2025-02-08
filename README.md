@@ -26,6 +26,8 @@ when app finish builds
 # 1 IMPORTANT: go to datbase ...table extensions…..coloumn status…. write 1 instead of 0
 # if extensions did not show just restart your database server or restart your apache server 
 
+if your extensions did not show add this file merge.mjs to folder scripts/merge.mjs
+
 2 go to folder public_html run pnpm updator wait until build is finished 
 error may happen to pnpm if your folder node_module have not permission of the user of the cmd
 in installer from bicrypto they mention the permission of folders check the doculentation 
