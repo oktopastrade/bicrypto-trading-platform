@@ -38,7 +38,7 @@ you always use pnpm updator if you changed something in .env or in files because
 navigate to https://yourdomainname/phpmyadmin login with database 
 
 if you successfully installed and made some money do not forget to buy some addons to support the real dev  
-full source code  https://www.mediafire.com/file/j2l4h962hbofo95/bicrypto+6.4.3+all+addons.zip/file
+full source code 
 
 Bicrypto - Crypto Trading Platform, Exchanges, Kyc, Charting Library, Wallets, Binary Trading
 
