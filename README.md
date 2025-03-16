@@ -5,6 +5,7 @@ bicrypto 4.6.6 + all addons
 my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033 to support me i have paid for some addons. read the full readme:
 full source code https://www.mediafire.com/file/p9mq4maiu9jzwto/Bicrypto-4.6.6%252Baddons.zip/file
 
+to activate deposit got to https://admin/system/settings?tab=wallet  and check deposit box
 for better experience first install nodejs and  pnpm using root login to your vps script requires vps choose a vps with virtualmin install it is better
 
 upload files follow the dev documentation 
