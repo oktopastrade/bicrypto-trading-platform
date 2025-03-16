@@ -3,7 +3,7 @@ bicrypto 4.6.4 + all addons
 
 
 my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033 to support me i have paid for some addons. read the full readme:
-full source code https://www.mediafire.com/file/wdylv4voyukn8ue/bicrypto_v4.6.4%252BAddons.zip/file
+full source code https://www.mediafire.com/file/p9mq4maiu9jzwto/Bicrypto-4.6.6%252Baddons.zip/file
 
 for better experience first install nodejs and  pnpm using root login to your vps script requires vps choose a vps with virtualmin install it is better
 
@@ -149,7 +149,7 @@ MO_TESTNET_RPC_WSS="wss://testnet-rpc.mochain.app/ws"
 
 
 then pnpm updator
-follow the bivrypto documentation to add vars to your .env
+follow the bicrypto documentation to add vars to your .env
 
 
 for the files they are in bicrypto 4.6.3 on /backend/blockchains/
