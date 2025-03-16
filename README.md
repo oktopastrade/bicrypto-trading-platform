@@ -1,5 +1,5 @@
 # bicrypto-trading-platform
-bicrypto 4.6.4 + all addons
+bicrypto 4.6.6 + all addons
 
 
 my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033 to support me i have paid for some addons. read the full readme:
