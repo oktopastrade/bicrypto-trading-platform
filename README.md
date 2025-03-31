@@ -5,7 +5,19 @@ bicrypto 4.6.6 + all addons
 my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033 to support me i have paid for some addons. read the full readme:
 full source code https://www.mediafire.com/file/p9mq4maiu9jzwto/Bicrypto-4.6.6%252Baddons.zip/file
 
+Mobile app:
+https://www.mediafire.com/file/rqg2fvhqsaqve9l/bicrypto_appv3.5.zip/file
+
 to activate deposit got to https://yourwebsite.com/admin/system/settings?tab=wallet  and check deposit box
+
+deposit & withdrawal errors :
+
+activate trades /currencies /withdrawal on api binance/kucoin/xt  allow the api to work  on your vps ip (do not use USA ip for vps change it will not work unless you are resident of USA)
+
++ ecosystem you have to run the extension 12 mnemonic everytime you restart bicrypto or reboot your vps:
+
+in yourwebsite.com/admin/ext/ecosystem click on initiate Vault enter your mnemonic 
+
 
 upload files follow the dev documentation 
 
