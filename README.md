@@ -12,7 +12,7 @@ to activate deposit got to https://yourwebsite.com/admin/system/settings?tab=wal
 
 deposit & withdrawal errors :
 
-activate trades /currencies /withdrawal on api binance/kucoin/xt  allow the api to work  on your vps ip (do not use USA ip for vps change it will not work unless you are resident of USA)
+activate trades /currencies /withdrawal on api binance/kucoin/xt  allow the api to work  on your vps ip (do not use USA ip for vps change it will not work unless you are resident of USA BINANCE KUCOIN XT will block connection)
 
 + ecosystem you have to run the extension 12 mnemonic everytime you restart bicrypto or reboot your vps:
 
