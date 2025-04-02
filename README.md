@@ -18,7 +18,7 @@ activate trades /currencies /withdrawal on api binance/kucoin/xt  allow the api 
 
 in yourwebsite.com/admin/ext/ecosystem click on initiate Vault enter your mnemonic 
 
-+ error fetching means you did not import currencies for spot . after you choose for example binance added your api you have to import and activate currencies : go to yourwebsite.com/admin/finance/exchange then click view button then currencies click import and choose btc to activate it
++ error fetching means you did not import currencies for spot . after you choose for example binance added your api you have to import and activate currencies : go to yourwebsite.com/admin/finance/exchange then click view button then currencies click import and choose btc to activate it. if you are using kucoin or kraken make sure to allow trades/currencies/withdrawal/deposit from your account by whitelisting your vps ip or you will get error fetching currencies because your api does not have full permission
  
 
 
