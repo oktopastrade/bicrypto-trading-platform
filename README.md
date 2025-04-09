@@ -3,10 +3,15 @@ bicrypto 4.6.6 + all addons
 
 
 my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033 to support me i have paid for some addons. read the full readme:
+
 full source code :
 https://www.mediafire.com/file/47353kfwt64c5w4/Bicrypto-4.6.6%252Baddons_final.zip/file
+
+
 Mobile app:
 https://www.mediafire.com/file/rqg2fvhqsaqve9l/bicrypto_appv3.5.zip/file
+
+
 
 to activate deposit got to https://yourwebsite.com/admin/system/settings?tab=wallet  and check deposit box
 
