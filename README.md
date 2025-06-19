@@ -2,6 +2,7 @@
 bicrypto V5 without addons for test :
 must read :
 V5 without addons for test it has many bugs bicrypto dev said he will share a tool that do auto update migration for V4 to V5 this for test do not use it if ypu have users and custodial wallets i will wait until tool is released then i will share the most stable version with addons
+#V5
 https://www.mediafire.com/file/qs07rkkt6jf2w0c/bicrypto_v5.0.0-without-addons.zip/file
 
 error if you are using ALMALINUX :
