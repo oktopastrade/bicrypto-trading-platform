@@ -1,5 +1,18 @@
 # bicrypto-trading-platform
-bicrypto 4.6.6 + all addons
+bicrypto V5 without addons for test :
+must read :
+V5 without addons for test it has many bugs bicrypto dev said he will share a tool that do auto update migration for V4 to V5 this for test do not use it if ypu have users and custodial wallets i will wait until tool is released then i will share the most stable version with addons
+https://www.mediafire.com/file/qs07rkkt6jf2w0c/bicrypto_v5.0.0-without-addons.zip/file
+
+error if you are using ALMALINUX :
+STEP3 of install may fail due to installer.sh using apt which only work with ubuntu if you are using almalinux use dnf i have change it here it checks if dev tools is installed if yes then proceed install automatically if you are using other linux destro ask chatgpt to change your installer.sh from line 218 to 276 
+here is the installer.sh for almalinux:
+
+https://github.com/oktopastrade/bicrypto-trading-platform/blob/main/installer.sh
+
+
+
+stable version bicrypto 4.6.6 + all addons
 
 
 my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033 to support me i have paid for some addons. read the full readme:
