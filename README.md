@@ -3,7 +3,7 @@ bicrypto V5.2.3 +Addons+Mobileapp 3.6 :
 must read readme file . download   :
 
 https://www.mediafire.com/file/hzyg5zmq6wvf241/bicryptoV5.2.3-Addons.zip/file
-some user got error while pnpm install they failed to install modules because of virtualmin disk quota is by default 2GB  go to edit server on virtualmin then click quotas and limits then choose unlimited it will work 
+some user got error while pnpm install they failed to install modules because of virtualmin disk quota is by default 2GB  go to edit server on virtualmin then click quotas and limits then choose unlimited then restart vps it will work 
 
  they are related to virtualmin disk quota default to 2GB 
 
