@@ -1,24 +1,13 @@
 # bicrypto-trading-platform
-bicrypto V5.2.7 +Addons+Mobileapp 3.6 :
+bicrypto V5.3.3 +Addons :
 must read readme file . download   :
 
-https://www.mediafire.com/file/heghbl5b5a2x123/BICRYPTOV5.2.7.zip/file
+https://www.mediafire.com/file/9h3vo7khax8m8bs/V-5.3.3addons.zip/file
 some user got error while pnpm install they failed to install modules because of virtualmin disk quota is by default 2GB  go to edit server on virtualmin then click quotas and limits then choose unlimited then restart vps it will work 
 
  they are related to virtualmin disk quota default to 2GB 
 
-
-stable version bicrypto 4.6.6 + all addons
-
-
 my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033 to support me i have paid for some addons. read the full readme:
-
-full source code :
-https://www.mediafire.com/file/47353kfwt64c5w4/Bicrypto-4.6.6%252Baddons_final.zip/file
-
-
-Mobile app:
-https://www.mediafire.com/file/rqg2fvhqsaqve9l/bicrypto_appv3.5.zip/file
 
 
 
