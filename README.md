@@ -5,7 +5,8 @@ must read readme file . download   :
 https://www.mediafire.com/file/xmxtl8cm6dmu6op/bicryptoV5.3.7addons.zip/file  reboot after adding your exchange api and secret
 some user got error while pnpm install they failed to install modules because of virtualmin disk quota is by default 2GB  go to edit server on virtualmin then click quotas and limits then choose unlimited then restart vps it will work  
 
- they are related to virtualmin disk quota default to 2GB 
+they are related to virtualmin disk quota default to 2GB 
+you can generate tokens (smart contract) in ecosystem easy to start your own coin by going to yourwebsite//admin/ecosystem/token/create then choose deploy token or import if you already has your own
 
 my eth address 0xFf04647D7FbC5897c6a439D811eBB8deAdeF4033 to support me i have paid for some addons. read the full readme:
 FULL INSTALL DOC
