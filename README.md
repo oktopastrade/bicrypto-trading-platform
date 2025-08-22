@@ -2,6 +2,9 @@
 bicrypto V5.4.3 +Addons :
 must read readme file . download   :
 https://www.mediafire.com/file/mzoop4n7q24scmx/bicryptoV5.4.3.zip/file  
+Mobileapp ios & android latest version V5
+https://www.mediafire.com/file/rv01m1eh46firhh/bicrypto-mobile-fully-native-flutter-mobile-app.zip/file
+
 reboot after adding your exchange api and secret
 some user got error while pnpm install they failed to install modules because of virtualmin disk quota is by default 2GB  go to edit server on virtualmin then click quotas and limits then choose unlimited then restart vps it will work  
 
