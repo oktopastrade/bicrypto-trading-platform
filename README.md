@@ -1,7 +1,7 @@
 # bicrypto-trading-platform
-bicrypto V5.4.3 +Addons updated + Mobileapp ios & android latest version V5:
+bicrypto V5.4.6 +Addons updated + Mobileapp ios & android latest version V5:
 must read readme file . download   :
-https://www.mediafire.com/file/j7576hwcpcicc92/bicryptoV5.4.4.zip/file
+https://www.mediafire.com/file/t5qw457vb3ipfms/bicryptoV5.4.6.zip/file
 
 
 reboot after adding your exchange api and secret
