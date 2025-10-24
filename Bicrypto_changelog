@@ -1,0 +1,190 @@
+# Update Notes​ 5.5.8
+Critical Fixes​
+WebSocket Subscription Management​
+
+    • Fixed WebSocket unsubscribe not working when switching markets
+
+
+    • Changed unsubscribe timer key from stream-based to subscription-based (includes symbol)
+
+
+    • Previously: Timer key was eco:ticker, causing different symbols to cancel each other's unsubscribe
+
+
+    • Now: Timer key is eco:ticker:MASH/BNB, allowing proper per-symbol cleanup
+
+
+    • Fixed issue where switching from MASH/BNB to MO/USDT would cancel the unsubscribe for MASH/BNB
+
+
+    • Fixed orderbook and trades not subscribing when switching markets
+
+
+    • Removed stream from activeStreamSubscriptions immediately when last callback removed
+
+
+    • Previously: Stream remained marked as "subscribed" during 100ms debounce, preventing new subscriptions
+
+
+    • Now: Stream removed immediately, allowing instant re-subscription to new symbol
+
+
+    • Unsubscribe message still debounced by 100ms to prevent spam during rapid remounts
+
+
+    • Fixed subscription debounce check to verify symbol matches
+
+
+    • Added symbol comparison in debounce timeout check
+
+
+    • Prevents canceling unsubscribe when different symbol subscribes to same stream type
+
+
+    • Ensures unsubscribe messages are only canceled for the exact same subscription
+
+URL & Internationalization​
+
+    • Fixed locale prefix being removed from URLs
+
+
+    • Added useLocale() hook from next-intl in trading layout and markets panel
+
+
+    • URL construction now includes locale: /${locale}${pathname}?symbol=...
+
+
+    • Prevents URLs changing from /en/trade?... to /trade?...
+
+
+    • Affected files: trading-layout.tsx, markets-panel.tsx
+
+
+    • Fixed URL changing from type=spot-eco to type=spot on market switch
+
+
+    • Updated handleSymbolChange function signature to accept "eco" market type
+
+
+    • Fixed URL type logic to handle targetMarketType === "eco"
+
+
+    • Markets panel now passes "eco" instead of "spot" for ecosystem markets
+
+
+    • Updated TypeScript types in MarketsPanelProps to include "eco" option
+
+Market Type Detection​
+
+    • Fixed incorrect market type on initial page load
+
+
+    • Added isEco prop to TradingInterface component, passed from parent's URL check
+
+
+    • Prevents components from subscribing to wrong market type during initialization
+
+
+    • getMarketType() now checks prop first before falling back to currentMarket state
+
+
+    • Eliminates initial subscription to SPOT market when URL specifies ECO market
+
+Component Communication​
+
+    • Fixed market switching cleanup event dispatch
+
+
+    • Markets panel now determines actual market type (eco vs spot) before calling onMarketSelect
+
+
+    • Cleanup event properly dispatched with correct oldMarketType and newMarketType
+
+
+    • Components receive correct market type immediately, preventing wrong subscriptions
+
+Panel Resizing​
+
+    • Fixed chart panel resize getting stuck when mouse hovers over TradingView chart
+
+
+    • Added pointer-events disabling on all iframes during resize operation
+
+
+    • Previously: Mouse entering TradingView iframe would capture events, breaking resize
+
+
+    • Now: Iframes have pointer-events: none during resize, restored to auto when done
+
+
+    • Affects all iframe-based content (TradingView charts, embedded content)
+
+Technical Improvements​
+Subscription Lifecycle​
+
+    • Subscribe to new symbol happens immediately (no delay)
+
+
+    • Unsubscribe from old symbol happens 100ms later (debounced)
+
+
+    • Provides better UX with no data gap during market switching
+
+
+    • Reduces unnecessary WebSocket message spam during rapid component remounts
+
+Timer Management​
+
+    • Unsubscribe timers now use full subscription key: ${marketType}:${type}:${symbol}[:interval]
+
+
+    • Each symbol has independent unsubscribe timer
+
+
+    • Prevents cross-symbol interference in cleanup logic
+
+Stream State Management​
+
+    • activeStreamSubscriptions updated immediately on last callback removal
+
+
+    • Allows instant re-subscription to same stream type with different symbol
+
+
+    • Debounce only affects unsubscribe message sending, not stream availability
+
+Behavior Changes​
+URL Updates​
+
+    • Before: /trade?symbol=MASH-BNB&type=spot-eco → /trade?symbol=MO-USDT&type=spot (locale lost, type changed)
+
+
+    • After: /en/trade?symbol=MASH-BNB&type=spot-eco → /en/trade?symbol=MO-USDT&type=spot-eco (locale preserved, type correct)
+
+Market Switching​
+
+    • Before: Ticker, orderbook, trades did not unsubscribe when changing markets (only OHLCV worked)
+
+
+    • After: All streams (ticker, orderbook, trades, ohlcv) properly unsubscribe and subscribe when changing markets
+
+Subscription Order​
+
+    • Before: Unsubscribe from old → wait 100ms → subscribe to new (data gap)
+
+
+    • After: Subscribe to new immediately → wait 100ms → unsubscribe from old (no data gap)
+
+Initial Load​
+
+    • Before: Subscribe to SPOT market → unsubscribe → subscribe to ECO market (when URL specified ECO)
+
+
+    • After: Subscribe directly to correct market type based on URL parameter
+
+Panel Resizing with Chart​
+
+    • Before: Resizing panel with TradingView chart would get stuck when mouse hovers over chart iframe
+
+
+    • After: Resize continues smoothly as iframes are disabled during resize operation
