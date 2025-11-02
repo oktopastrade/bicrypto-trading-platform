@@ -1,190 +1,90 @@
-# Update Notes​ 5.5.8
-Critical Fixes​
-WebSocket Subscription Management​
+# Update Notes​ 5.5.9
 
-    • Fixed WebSocket unsubscribe not working when switching markets
+Update Notes
+Important Note
 
+    • Before updating: Delete /frontend/middleware.ts if present to avoid build conflicts
 
-    • Changed unsubscribe timer key from stream-based to subscription-based (includes symbol)
+Fixed
 
+Trading Page - Ecosystem Markets
 
-    • Previously: Timer key was eco:ticker, causing different symbols to cancel each other's unsubscribe
+    • Order Cancellation: Fixed "Failed to cancel order" error for Eco markets
 
 
-    • Now: Timer key is eco:ticker:MASH/BNB, allowing proper per-symbol cleanup
+    • Batch Cancellation: Fixed "Failed to cancel all orders" error for Eco markets
 
 
-    • Fixed issue where switching from MASH/BNB to MO/USDT would cancel the unsubscribe for MASH/BNB
+    • Order History: Fixed cancelled orders now appearing immediately in History tab without page reload
 
 
-    • Fixed orderbook and trades not subscribing when switching markets
+    • Open Orders Display: Fixed new orders requiring page reload to appear in Open Orders tab - orders now appear instantly
 
 
-    • Removed stream from activeStreamSubscriptions immediately when last callback removed
+    • Order Book Prices: Fixed prices showing as 0.000000 for values below 0.01 (e.g., 0.001 now displays correctly)
 
 
-    • Previously: Stream remained marked as "subscribed" during 100ms debounce, preventing new subscriptions
+    • Total Calculations: Fixed Total column showing 0.00 for small price calculations
 
+Payment Methods
 
-    • Now: Stream removed immediately, allowing instant re-subscription to new symbol
+    • QR Code Support: Fixed QR Code option not appearing in Type dropdown when creating new deposit methods
 
+Investment Management
 
-    • Unsubscribe message still debounced by 100ms to prevent spam during rapid remounts
+    • Duration Selection: Fixed duration saving error in AI Investment and Forex plans
 
 
-    • Fixed subscription debounce check to verify symbol matches
+    • Menu Visibility: Fixed Investment Management section not appearing in Finance menu
 
+Forex Trading
 
-    • Added symbol comparison in debounce timeout check
+    • Account Type Display: Fixed Forex account MT version always showing MT4 instead of selected MT5
 
+Build System
 
-    • Prevents canceling unsubscribe when different symbol subscribes to same stream type
+    • ⚠️ IMPORTANT: Before running pnpm updator, manually delete /frontend/middleware.ts file if it exists
 
 
-    • Ensures unsubscribe messages are only canceled for the exact same subscription
+    • Next.js 16 Compatibility: Cleared middleware/proxy conflict causing build errors
 
-URL & Internationalization​
+Improved
 
-    • Fixed locale prefix being removed from URLs
+Order Book Enhancements
 
+    • Amount Display: Improved amount column formatting to strip trailing zeros (e.g., 1.00000000 displays as "1")
 
-    • Added useLocale() hook from next-intl in trading layout and markets panel
 
+    • Price Grouping: Improved order book grouping with fine-grained aggregation levels supporting micro-cap tokens
 
-    • URL construction now includes locale: /${locale}${pathname}?symbol=...
 
+    • Aggregation Options: Expanded aggregation dropdown from 4 to 8 options for better flexibility
 
-    • Prevents URLs changing from /en/trade?... to /trade?...
 
+    • Decimal Precision: Enhanced aggregation algorithm for floating-point precision
 
-    • Affected files: trading-layout.tsx, markets-panel.tsx
+Trading Interface
 
+    • Smart Price Formatting: Prices now display with appropriate decimal places based on value magnitude
 
-    • Fixed URL changing from type=spot-eco to type=spot on market switch
 
+    • Real-time Updates: Orders now appear instantly via WebSocket without requiring page refresh
 
-    • Updated handleSymbolChange function signature to accept "eco" market type
 
+    • Better Precision: Support for micro-priced assets and meme coins with tiny prices
 
-    • Fixed URL type logic to handle targetMarketType === "eco"
+Added
 
+Investment Features
 
-    • Markets panel now passes "eco" instead of "spot" for ecosystem markets
+    • Duration Selection: Added multiselect duration field to AI Investment plans
 
 
-    • Updated TypeScript types in MarketsPanelProps to include "eco" option
+    • Forex Durations: Added multiselect duration field to Forex plans
 
-Market Type Detection​
 
-    • Fixed incorrect market type on initial page load
+    • Multiple Durations: Investment and Forex plans can now select multiple durations when creating or editing
 
+Payment Methods
 
-    • Added isEco prop to TradingInterface component, passed from parent's URL check
-
-
-    • Prevents components from subscribing to wrong market type during initialization
-
-
-    • getMarketType() now checks prop first before falling back to currentMarket state
-
-
-    • Eliminates initial subscription to SPOT market when URL specifies ECO market
-
-Component Communication​
-
-    • Fixed market switching cleanup event dispatch
-
-
-    • Markets panel now determines actual market type (eco vs spot) before calling onMarketSelect
-
-
-    • Cleanup event properly dispatched with correct oldMarketType and newMarketType
-
-
-    • Components receive correct market type immediately, preventing wrong subscriptions
-
-Panel Resizing​
-
-    • Fixed chart panel resize getting stuck when mouse hovers over TradingView chart
-
-
-    • Added pointer-events disabling on all iframes during resize operation
-
-
-    • Previously: Mouse entering TradingView iframe would capture events, breaking resize
-
-
-    • Now: Iframes have pointer-events: none during resize, restored to auto when done
-
-
-    • Affects all iframe-based content (TradingView charts, embedded content)
-
-Technical Improvements​
-Subscription Lifecycle​
-
-    • Subscribe to new symbol happens immediately (no delay)
-
-
-    • Unsubscribe from old symbol happens 100ms later (debounced)
-
-
-    • Provides better UX with no data gap during market switching
-
-
-    • Reduces unnecessary WebSocket message spam during rapid component remounts
-
-Timer Management​
-
-    • Unsubscribe timers now use full subscription key: ${marketType}:${type}:${symbol}[:interval]
-
-
-    • Each symbol has independent unsubscribe timer
-
-
-    • Prevents cross-symbol interference in cleanup logic
-
-Stream State Management​
-
-    • activeStreamSubscriptions updated immediately on last callback removal
-
-
-    • Allows instant re-subscription to same stream type with different symbol
-
-
-    • Debounce only affects unsubscribe message sending, not stream availability
-
-Behavior Changes​
-URL Updates​
-
-    • Before: /trade?symbol=MASH-BNB&type=spot-eco → /trade?symbol=MO-USDT&type=spot (locale lost, type changed)
-
-
-    • After: /en/trade?symbol=MASH-BNB&type=spot-eco → /en/trade?symbol=MO-USDT&type=spot-eco (locale preserved, type correct)
-
-Market Switching​
-
-    • Before: Ticker, orderbook, trades did not unsubscribe when changing markets (only OHLCV worked)
-
-
-    • After: All streams (ticker, orderbook, trades, ohlcv) properly unsubscribe and subscribe when changing markets
-
-Subscription Order​
-
-    • Before: Unsubscribe from old → wait 100ms → subscribe to new (data gap)
-
-
-    • After: Subscribe to new immediately → wait 100ms → unsubscribe from old (no data gap)
-
-Initial Load​
-
-    • Before: Subscribe to SPOT market → unsubscribe → subscribe to ECO market (when URL specified ECO)
-
-
-    • After: Subscribe directly to correct market type based on URL parameter
-
-Panel Resizing with Chart​
-
-    • Before: Resizing panel with TradingView chart would get stuck when mouse hovers over chart iframe
-
-
-    • After: Resize continues smoothly as iframes are disabled during resize operation
+    • QR Code Fields: Added QR Code option to deposit method custom fields in Type dropdown
