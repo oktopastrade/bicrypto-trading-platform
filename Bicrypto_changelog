@@ -1,2 +1,92 @@
 Update Notes
 Core 5.6.2 - Latest updates and improvements.
+
+**Tags:** ECOSYSTEM TRADING, WEBSOCKET, ORDER MANAGEMENT, UI IMPROVEMENTS, REAL-TIME UPDATES
+
+## Fixed
+
+### Ecosystem Order Management
+
+- **Order Cancellation Timestamp**: Fixed "Invalid date" error when canceling ecosystem orders - now correctly passes order's createdAt timestamp instead of Date.now()
+- **Balance Updates**: Fixed spendable balance not updating in real-time after order cancellation - now broadcasts wallet update events
+- **100% Orders**: Fixed 100% order placement failing due to fee not being subtracted from available balance
+- **Sell Orders**: Fixed 100% SELL orders failing with "insufficient balance" error - now correctly calculates spendable balance (balance - inOrder)
+- **Negative Balance**: Fixed asset balance going negative due to double-locking when creating orders - now properly uses spendable balance calculations
+- **Amount Field Bug**: Fixed "untitled" text appearing in amount field after order submission - changed to empty string
+
+### WebSocket Improvements
+
+- **Orders WebSocket**: Created dedicated orders WebSocket service (`orders-ws.ts`) separate from market data WebSocket to prevent message routing conflicts
+- **Connection IDs**: Fixed WebSocket messages being sent to wrong connections by using unique connection IDs (`orders-eco`, `orders-spot`, `orders-futures`)
+- **Persistent Connection**: Moved orders WebSocket initialization to trading-layout level so connection stays alive even when orders panel is collapsed
+- **Message Routing**: Fixed notifications and announcements being sent to all WebSocket connections - now only sent to `/api/user` connection using `sendToClientOnRoute()`
+- **Partial Fills**: Fixed partial fills not appearing in real-time - now broadcasts order updates after each match in matchmaking
+
+### Market Panel
+
+- **isEco Flag**: Fixed eco market flag being lost when ticker data updates - now preserves all original market properties using spread operator pattern
+- **Property Preservation**: Changed market update pattern from manual reconstruction to spread operator (`{...market, ...tickerUpdates}`) to prevent losing properties
+
+## Improved
+
+### Trading Interface
+
+- **Fee Calculations**: Enhanced all order forms (limit, market, stop) to properly calculate fees for 100% orders
+  - BUY orders: `amount = availableBalance / (price * (1 + takerFee))`
+  - SELL orders: Use full balance (fee deducted from proceeds)
+- **Fee Display**: Added trading fee display in order form UI showing fee percentage and estimated fee amount
+- **Amount Precision**: Improved amount calculations using `Math.floor()` for proper rounding instead of hardcoded buffers
+
+### Orders Panel - Fill Progress
+
+- **Filled/Amount Display**: Enhanced Open Orders table to show "Filled / Amount" instead of just "Amount"
+- **Visual Progress Bar**: Added color-coded progress bar (green for BUY, red for SELL) showing fill percentage
+- **Real-time Updates**: Partial fills now update instantly via WebSocket without page reload
+- **Compact Layout**: Optimized column width with `min-w-[120px]` for better space utilization
+- **Percentage Indicator**: Shows fill percentage (e.g., "2%") next to progress bar for instant clarity
+
+### Fee Handling
+
+- **Taker/Maker Fees**: Properly passes market-specific taker and maker fees from market metadata to order forms
+- **Dynamic Fee Rates**: Fees are now pulled from market configuration instead of being hardcoded
+- **Fee Transparency**: Users can see exact fee amount before placing orders
+
+## Added
+
+### WebSocket Architecture
+
+- **Orders WebSocket Service**: New dedicated service (`/services/orders-ws.ts`) for handling order updates
+  - Supports multiple market types (spot, eco, futures)
+  - Connection status tracking per market type
+  - Automatic reconnection handling
+  - Message caching for late subscribers
+- **Message Broker Improvements**: Enhanced `sendToClientOnRoute()` method for route-specific WebSocket messaging
+
+### Real-time Order Updates
+
+- **Partial Fill Broadcasting**: Orders now broadcast updates after each match in the matching engine
+- **Live Progress**: Users see their orders getting filled in real-time with visual progress indicators
+- **Multi-user Updates**: Both buyer and seller receive instant updates when orders partially fill
+
+## Technical Improvements
+
+### Code Quality
+
+- **Removed Debug Logs**: Cleaned up verbose console logging from production code:
+  - Ecosystem orders API logs
+  - Scylla query execution logs
+  - Orders WebSocket connection logs
+  - Trading layout initialization logs
+- **Better Error Handling**: Kept only essential error logging for debugging real issues
+
+### WebSocket Performance
+
+- **Connection Management**: Single persistent connection per market type at layout level
+- **Efficient Callbacks**: Panels register/unregister callbacks without affecting connection
+- **No Duplicate Messages**: Fixed duplicate order broadcasts in matching engine
+
+### Balance Calculations
+
+- **Spendable Balance**: Wallet endpoint now returns `balance - inOrder` for accurate available balance
+- **Order Validation**: Pre-flight checks use spendable balance to prevent insufficient balance errors
+
