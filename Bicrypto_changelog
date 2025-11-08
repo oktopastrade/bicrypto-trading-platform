@@ -1,92 +1,120 @@
-Update Notes
-Core 5.6.2 - Latest updates and improvements.
+Update Notes - Core 5.6.3 
 
-**Tags:** ECOSYSTEM TRADING, WEBSOCKET, ORDER MANAGEMENT, UI IMPROVEMENTS, REAL-TIME UPDATES
+Fixed
 
-## Fixed
+Ecosystem Order Matching
 
-### Ecosystem Order Management
+    • Partial Fill Fees: Fixed sellers being charged full order fee instead of proportional fee on partial fills - now correctly charges only for the filled amount
 
-- **Order Cancellation Timestamp**: Fixed "Invalid date" error when canceling ecosystem orders - now correctly passes order's createdAt timestamp instead of Date.now()
-- **Balance Updates**: Fixed spendable balance not updating in real-time after order cancellation - now broadcasts wallet update events
-- **100% Orders**: Fixed 100% order placement failing due to fee not being subtracted from available balance
-- **Sell Orders**: Fixed 100% SELL orders failing with "insufficient balance" error - now correctly calculates spendable balance (balance - inOrder)
-- **Negative Balance**: Fixed asset balance going negative due to double-locking when creating orders - now properly uses spendable balance calculations
-- **Amount Field Bug**: Fixed "untitled" text appearing in amount field after order submission - changed to empty string
 
-### WebSocket Improvements
+    • Locked Funds Release: Fixed buyer's funds staying locked forever on partial fills - proportional cost and fee now properly released from locked balance
 
-- **Orders WebSocket**: Created dedicated orders WebSocket service (`orders-ws.ts`) separate from market data WebSocket to prevent message routing conflicts
-- **Connection IDs**: Fixed WebSocket messages being sent to wrong connections by using unique connection IDs (`orders-eco`, `orders-spot`, `orders-futures`)
-- **Persistent Connection**: Moved orders WebSocket initialization to trading-layout level so connection stays alive even when orders panel is collapsed
-- **Message Routing**: Fixed notifications and announcements being sent to all WebSocket connections - now only sent to `/api/user` connection using `sendToClientOnRoute()`
-- **Partial Fills**: Fixed partial fills not appearing in real-time - now broadcasts order updates after each match in matchmaking
 
-### Market Panel
+    • Negative Balance: Fixed trade balance going negative due to wallet data type conversion issues - now explicitly converts Decimal types to numbers for accurate arithmetic
 
-- **isEco Flag**: Fixed eco market flag being lost when ticker data updates - now preserves all original market properties using spread operator pattern
-- **Property Preservation**: Changed market update pattern from manual reconstruction to spread operator (`{...market, ...tickerUpdates}`) to prevent losing properties
 
-## Improved
+    • Price Execution: Fixed unfair price matching where buyers always got their price - now properly uses maker's price (whoever placed order first)
 
-### Trading Interface
 
-- **Fee Calculations**: Enhanced all order forms (limit, market, stop) to properly calculate fees for 100% orders
-  - BUY orders: `amount = availableBalance / (price * (1 + takerFee))`
-  - SELL orders: Use full balance (fee deducted from proceeds)
-- **Fee Display**: Added trading fee display in order form UI showing fee percentage and estimated fee amount
-- **Amount Precision**: Improved amount calculations using `Math.floor()` for proper rounding instead of hardcoded buffers
+    • Unauthorized Credit: Fixed orders executing even when wallet updates failed due to insufficient funds - matching now properly aborts when validation fails
 
-### Orders Panel - Fill Progress
 
-- **Filled/Amount Display**: Enhanced Open Orders table to show "Filled / Amount" instead of just "Amount"
-- **Visual Progress Bar**: Added color-coded progress bar (green for BUY, red for SELL) showing fill percentage
-- **Real-time Updates**: Partial fills now update instantly via WebSocket without page reload
-- **Compact Layout**: Optimized column width with `min-w-[120px]` for better space utilization
-- **Percentage Indicator**: Shows fill percentage (e.g., "2%") next to progress bar for instant clarity
+    • Error Handling: Fixed order matching continuing after wallet update errors - failed matches are now skipped and orders remain available for retry
 
-### Fee Handling
 
-- **Taker/Maker Fees**: Properly passes market-specific taker and maker fees from market metadata to order forms
-- **Dynamic Fee Rates**: Fees are now pulled from market configuration instead of being hardcoded
-- **Fee Transparency**: Users can see exact fee amount before placing orders
+    • Order Cancellation: Fixed partial fill cancellation refunding incorrect amounts - users receiving more than they should when cancelling partially filled orders - now correctly refunds only the remaining unfilled portion
 
-## Added
+Email Notifications
 
-### WebSocket Architecture
+    • Email Verification: Fixed email verification and deposit confirmation emails not being sent - added missing URL shortcode to template validation
 
-- **Orders WebSocket Service**: New dedicated service (`/services/orders-ws.ts`) for handling order updates
-  - Supports multiple market types (spot, eco, futures)
-  - Connection status tracking per market type
-  - Automatic reconnection handling
-  - Message caching for late subscribers
-- **Message Broker Improvements**: Enhanced `sendToClientOnRoute()` method for route-specific WebSocket messaging
+Trading Interface
 
-### Real-time Order Updates
+    • Balance Display: Fixed trading page showing only available balance instead of total balance - now displays total balance, locked amount, and available balance separately for better clarity
 
-- **Partial Fill Broadcasting**: Orders now broadcast updates after each match in the matching engine
-- **Live Progress**: Users see their orders getting filled in real-time with visual progress indicators
-- **Multi-user Updates**: Both buyer and seller receive instant updates when orders partially fill
 
-## Technical Improvements
+    • Chart Updates: Fixed OHLCV (candlestick) data not broadcasting to WebSocket subscribers when orders are matched - corrected subscription filter property order to match frontend subscription format
 
-### Code Quality
+Improved
 
-- **Removed Debug Logs**: Cleaned up verbose console logging from production code:
-  - Ecosystem orders API logs
-  - Scylla query execution logs
-  - Orders WebSocket connection logs
-  - Trading layout initialization logs
-- **Better Error Handling**: Kept only essential error logging for debugging real issues
+Fee Model
 
-### WebSocket Performance
+    • Maker/Taker Fees: Improved fee assignment to use industry-standard maker/taker model
 
-- **Connection Management**: Single persistent connection per market type at layout level
-- **Efficient Callbacks**: Panels register/unregister callbacks without affecting connection
-- **No Duplicate Messages**: Fixed duplicate order broadcasts in matching engine
 
-### Balance Calculations
+    • Market orders now use taker fee (removes liquidity)
 
-- **Spendable Balance**: Wallet endpoint now returns `balance - inOrder` for accurate available balance
-- **Order Validation**: Pre-flight checks use spendable balance to prevent insufficient balance errors
 
+    • Limit orders that cross spread use taker fee (removes liquidity)
+
+
+    • Limit orders that rest on book use maker fee (adds liquidity)
+
+
+    • Previous behavior incorrectly assigned fees based on buy/sell side only
+
+Order Matching
+
+    • Proportional Fees: Enhanced fee calculations to properly handle partial fills
+
+
+    • 10% order fill now charges 10% of the fee (was charging 100% before)
+
+
+    • Locked funds released proportionally including fee portion
+
+
+    • All calculations maintain 18 decimal precision for accuracy
+
+Wallet Operations
+
+    • Balance Integrity: Improved wallet update logic to prevent balance discrepancies
+
+
+    • Fresh wallet data fetched before each update to prevent stale data bugs
+
+
+    • Separate handling for order creation/cancellation vs order matching
+
+
+    • Both balance and locked funds (inOrder) validated before updates
+
+Balance Display
+
+    • Wallet Information: Enhanced wallet endpoint to return comprehensive balance details
+
+
+    • Total balance (balance + inOrder)
+
+
+    • Amount locked in orders (inOrder)
+
+
+    • Available/spendable balance
+
+
+    • Trading Interface: Improved balance display with clear breakdown of all balance components
+
+
+    • Shows total owned balance prominently
+
+
+    • Displays locked funds with lock icon when applicable
+
+
+    • Highlights available balance in green for easy identification
+
+Added
+
+Trading Features
+
+    • Maker/Taker Detection: Added automatic detection of maker/taker status at order creation
+
+
+    • System checks if limit order will immediately match (taker) or rest on book (maker)
+
+
+    • Applies appropriate fee rate based on liquidity provision
+
+
+    • Encourages market depth with lower maker fees
