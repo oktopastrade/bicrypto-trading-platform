@@ -1,120 +1,125 @@
-Update Notes - Core 5.6.3 
-
+Update Notes - Core 5.6.6
 Fixed
 
-Ecosystem Order Matching
+Menu Translation System
 
-    • Partial Fill Fees: Fixed sellers being charged full order fee instead of proportional fee on partial fills - now correctly charges only for the filled amount
-
-
-    • Locked Funds Release: Fixed buyer's funds staying locked forever on partial fills - proportional cost and fee now properly released from locked balance
+    • Translation Key Display: Fixed navbar menus showing translation keys (e.g., admin.dashboard.title) instead of actual translated text in non-English locales
 
 
-    • Negative Balance: Fixed trade balance going negative due to wallet data type conversion issues - now explicitly converts Decimal types to numbers for accurate arithmetic
+    • Root cause: t.raw('.') method in useMenuTranslations hook was attempting to access invalid translation path
 
 
-    • Price Execution: Fixed unfair price matching where buyers always got their price - now properly uses maker's price (whoever placed order first)
+    • Removed broken nested object navigation approach
 
 
-    • Unauthorized Credit: Fixed orders executing even when wallet updates failed due to insufficient funds - matching now properly aborts when validation fails
+    • Implemented direct translation lookup with proper fallback detection
 
 
-    • Error Handling: Fixed order matching continuing after wallet update errors - failed matches are now skipped and orders remain available for retry
+    • Added multiple validation checks to detect when translation lookup fails
 
 
-    • Order Cancellation: Fixed partial fill cancellation refunding incorrect amounts - users receiving more than they should when cancelling partially filled orders - now correctly refunds only the remaining unfilled portion
-
-Email Notifications
-
-    • Email Verification: Fixed email verification and deposit confirmation emails not being sent - added missing URL shortcode to template validation
-
-Trading Interface
-
-    • Balance Display: Fixed trading page showing only available balance instead of total balance - now displays total balance, locked amount, and available balance separately for better clarity
+    • Now correctly returns fallback item.title when translation not found
 
 
-    • Chart Updates: Fixed OHLCV (candlestick) data not broadcasting to WebSocket subscribers when orders are matched - corrected subscription filter property order to match frontend subscription format
-
-Improved
-
-Fee Model
-
-    • Maker/Taker Fees: Improved fee assignment to use industry-standard maker/taker model
+    • Translation Path Construction: Simplified menu key to translation path conversion
 
 
-    • Market orders now use taker fee (removes liquidity)
+    • Direct conversion from hyphenated keys (e.g., "admin-dashboard") to nested paths (e.g., "admin.dashboard.title")
 
 
-    • Limit orders that cross spread use taker fee (removes liquidity)
+    • Removed unnecessary path splitting and reconstruction logic
 
 
-    • Limit orders that rest on book use maker fee (adds liquidity)
+    • Eliminated unused getNestedValue() helper function
 
 
-    • Previous behavior incorrectly assigned fees based on buy/sell side only
-
-Order Matching
-
-    • Proportional Fees: Enhanced fee calculations to properly handle partial fills
+    • Fallback Detection: Improved detection of failed translations
 
 
-    • 10% order fill now charges 10% of the fee (was charging 100% before)
+    • Check if returned value matches the translation key
 
 
-    • Locked funds released proportionally including fee portion
+    • Detect if result contains .title or .description patterns (indicates unresolved key)
 
 
-    • All calculations maintain 18 decimal precision for accuracy
-
-Wallet Operations
-
-    • Balance Integrity: Improved wallet update logic to prevent balance discrepancies
-
-
-    • Fresh wallet data fetched before each update to prevent stale data bugs
-
-
-    • Separate handling for order creation/cancellation vs order matching
-
-
-    • Both balance and locked funds (inOrder) validated before updates
-
-Balance Display
-
-    • Wallet Information: Enhanced wallet endpoint to return comprehensive balance details
-
-
-    • Total balance (balance + inOrder)
-
-
-    • Amount locked in orders (inOrder)
-
-
-    • Available/spendable balance
-
-
-    • Trading Interface: Improved balance display with clear breakdown of all balance components
-
-
-    • Shows total owned balance prominently
-
-
-    • Displays locked funds with lock icon when applicable
-
-
-    • Highlights available balance in green for easy identification
+    • Properly fallback to English menu item title/description when translation unavailable
 
 Added
 
-Trading Features
+System Settings - Market Link Routing
 
-    • Maker/Taker Detection: Added automatic detection of maker/taker status at order creation
-
-
-    • System checks if limit order will immediately match (taker) or rest on book (maker)
+    • Market Link Route Setting: New configurable system setting to control where market links redirect users
 
 
-    • Applies appropriate fee rate based on liquidity provision
+    • Location: System Settings → Trading & Features → Market Link Route
 
 
-    • Encourages market depth with lower maker fees
+    • Options:
+
+
+    • Trading Page (default) - redirects to /trade?symbol=BTC-USDT
+
+
+    • Binary Trading - redirects to /binary?symbol=BTC-USDT
+
+
+    • Applies globally across all market links in the platform
+
+
+    • Admin can switch routing behavior without code changes
+
+Utility Functions
+
+    • Market Link Helpers - New utility functions in frontend/utils/market-links.ts
+
+
+    • getMarketLinkRoute(settings): Returns configured route path (/trade or /binary)
+
+
+    • buildMarketLink(settings, currency, pair): Builds complete market URL with symbol parameter
+
+
+    • Includes validation and automatic fallback to /trade if invalid configuration
+
+
+    • Type-safe implementation with full TypeScript support
+
+Improved
+
+Market Page
+
+    • Dynamic Route Links: Market page now respects market link route setting
+
+
+    • Market card links use dynamic routing based on system setting
+
+
+    • Trade action buttons adapt to configured route
+
+
+    • "Start Trading" CTAs respect admin preference
+
+
+    • Affected components:
+
+
+    • Individual market cards (both mobile and desktop)
+
+
+    • Desktop trade action buttons
+
+
+    • Bottom CTA section links
+
+Home Page
+
+    • Dynamic Asset Links: Home page top assets section now uses dynamic routing
+
+
+    • Top 5 cryptocurrency asset cards link to configured trading page
+
+
+    • Seamless integration with existing ticker data and animations
+
+
+    • Maintains all existing functionality while adding routing flexibility
