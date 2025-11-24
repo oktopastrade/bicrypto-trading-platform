@@ -1,3 +1,117 @@
-Update Notes - Core 5.6.8
+Update Notes - Core 5.6.9
 
-Core 5.6.8 - Latest updates and improvements.
+ **Critical Model References**: Fixed all incorrect and non-existent database model usage across the backend that could cause runtime crashes
+  - Fixed `models.walletTransaction` → `models.transaction` in staking system (4 occurrences)
+  - Fixed `models.kyc` → `models.kycApplication` in user export functionality
+  - Fixed `models.blockchainTransaction` references in 18 NFT-related files
+  - Fixed `models.nftIpfsUpload` crash in IPFS service with null check
+  - Fixed `models.nftMetadataBackup` crashes in metadata backup service (4 occurrences)
+  - All incorrectly referenced models now properly handled with null checks or correct model names
+
+### Staking System
+
+- **Transaction Recording**: Fixed staking position creation failing with "Cannot read properties of undefined (reading 'create')" error
+  - Root cause: Attempting to use non-existent `walletTransaction` model
+  - Now correctly uses `transaction` model with proper STAKING transaction types
+  - Affected endpoints:
+    - Staking position creation (`/staking/position`)
+    - Staking reward claims (`/staking/position/[id]/claim`)
+    - Admin bulk position updates (`/admin/staking/position/bulk`)
+- **Audit Trail**: All staking operations now properly create transaction records for complete audit history
+- **Metadata Format**: Fixed metadata not being stringified - now properly uses `JSON.stringify()`
+
+### NFT Marketplace
+
+- **Blockchain Transaction Tracking**: Fixed NFT operations not recording blockchain transactions
+  - Auction bids now record `NFT_AUCTION_BID` transactions
+  - Auction settlements record `NFT_AUCTION_SETTLE` transactions
+  - NFT purchases record `NFT_PURCHASE` transactions with full fee breakdown
+  - NFT transfers record `NFT_TRANSFER` transactions
+  - All transactions include blockchain details (transaction hash, gas, block numbers)
+- **Admin Profit Recording**: Fixed NFT marketplace fees not being tracked as admin profits
+  - Offer confirmations now create both transaction and adminProfit records
+  - Marketplace fees properly linked to profit tracking system
+  - Supports multiple currencies with wallet-based tracking
+- **Optional Features**: Services gracefully handle missing optional models (IPFS upload tracking, metadata backup)
+
+### Payment Gateway Metadata
+
+- **Metadata Stringification**: Fixed 19 payment gateway files with non-stringified metadata
+  - All metadata fields now properly use `JSON.stringify()` before database storage
+  - Prevents data corruption and ensures proper JSON parsing on retrieval
+
+### ICO Vesting System
+
+- **Vesting Release Model**: Created missing `icoTokenVestingRelease` model for tracking individual vesting releases
+  - Enables proper recording of each scheduled token release
+  - Tracks release status (PENDING, RELEASED, FAILED, CANCELLED)
+  - Records blockchain transaction hashes for on-chain releases
+  - Supports failure tracking with detailed error reasons
+
+## Added
+
+### Database Models
+
+- **NFT Price History Model**: New `nftPriceHistory` model for tracking NFT sale prices over time
+  - Records sale price, currency, and USD conversion at time of sale
+  - Tracks sale type (DIRECT, AUCTION, OFFER)
+  - Links to buyer, seller, token, and collection
+  - Enables historical price analysis and floor price tracking
+  - Includes blockchain transaction hash reference
+
+- **ICO Token Vesting Release Model**: New `icoTokenVestingRelease` model
+  - File: `backend/models/ext/ico/icoTokenVestingRelease.ts`
+  - Tracks individual scheduled releases within a vesting plan
+  - Fields:
+    - `vestingId` - Parent vesting record reference
+    - `releaseDate` - Scheduled release date
+    - `releaseAmount` - Token amount to release
+    - `percentage` - Percentage of total vesting
+    - `status` - PENDING | RELEASED | FAILED | CANCELLED
+    - `transactionHash` - On-chain transaction hash
+    - `releasedAt` - Actual release timestamp
+    - `failureReason` - Error details if failed
+  - Includes database indexes for efficient queries
+  - Properly associated with parent `icoTokenVesting` model
+
+### Transaction Types
+
+- **NFT Transaction Types**: Added 8 new transaction types to support NFT marketplace operations
+  - `NFT_PURCHASE` - Direct NFT purchases
+  - `NFT_SALE` - NFT sales (seller receiving payment)
+  - `NFT_MINT` - NFT minting operations
+  - `NFT_BURN` - NFT burning operations
+  - `NFT_TRANSFER` - Direct NFT transfers between users
+  - `NFT_AUCTION_BID` - Auction bid placements
+  - `NFT_AUCTION_SETTLE` - Auction settlements
+  - `NFT_OFFER` - Offer-based purchases
+- **Admin Profit Types**: Added 3 NFT-related admin profit types
+  - `NFT_SALE` - Marketplace fees from direct sales
+  - `NFT_AUCTION` - Fees from auction settlements
+  - `NFT_OFFER` - Fees from offer acceptances
+
+## Improved
+
+### Transaction Recording
+
+- **Wallet Integration**: All NFT marketplace transactions now properly link to user wallets
+  - Enables accurate balance tracking across all transaction types
+  - Supports multi-currency operations
+  - Gracefully handles cases where wallets don't exist yet
+
+### Code Quality
+
+- **Error Handling**: Enhanced error handling for optional model features
+  - IPFS upload tracking gracefully disabled if model not created
+  - Metadata backup service continues operation without model
+  - Gas history tracking properly guarded with null checks
+  - System backup functionality safely disabled when model unavailable
+
+### Model Associations
+
+- **ICO Vesting Relationships**: Enhanced `icoTokenVesting` model with complete associations
+  - `hasMany` relationship with `icoTokenVestingRelease` (as "releases")
+  - `belongsTo` relationship with `icoTransaction` (as "transaction")
+  - `belongsTo` relationship with `user` (as "user")
+  - `belongsTo` relationship with `icoTokenOffering` (as "offering")
+  - Enables efficient queries with proper eager loading
