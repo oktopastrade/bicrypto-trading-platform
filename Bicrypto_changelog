@@ -1,67 +1,278 @@
-Update Notes - Core 5.7.1
+Update Notes - Core 5.7.2
 Update Notes
+Added
+
+Ecosystem Trading
+
+    • Market Data WebSocket: Implemented real-time trades and OHLCV (candlestick) data streaming
+
+
+    • Live trade history showing recent buy/sell transactions with prices and amounts
+
+
+    • Real-time candlestick charts with configurable intervals (1m, 5m, 1h, 1d, etc.)
+
+
+    • Automatic updates only when new data is available to reduce bandwidth
+
+
+    • Supports custom data limits for different chart requirements
+
+
+    • Properly handles high-volume trading data from Scylla database
+
+NFT Marketplace
+
+    • Auction Enhancements: Dynamic minimum bid increment functionality
+
+
+    • Admins can configure minimum bid increments per auction
+
+
+    • Ensures fair bidding with customizable increment requirements
+
+
+    • Prevents bid sniping with proper increment enforcement
+
+
+    • Collection Watchers: Watchers count tracking
+
+
+    • Users can watch/unwatch NFT collections they're interested in
+
+
+    • Real-time watcher count display on collection pages
+
+
+    • Helps gauge collection popularity and community interest
+
+
+    • Withdrawal Tracking: Proper pending withdrawal status
+
+
+    • Clear status indicators for NFT withdrawal requests
+
+
+    • Accurate tracking throughout the withdrawal process
+
+
+    • Better user experience for NFT transfers
+
+
+    • Collection Deployment: Seamless frontend to backend connection
+
+
+    • Smooth NFT collection deployment workflow
+
+
+    • Proper error handling and status updates during deployment
+
+
+    • Smart contract deployment integration
+
+
+    • Marketplace Pause Status: Emergency pause functionality
+
+
+    • Admins can pause/unpause marketplace trading when needed
+
+
+    • Emergency stop for security incidents or maintenance
+
+
+    • Clear UI indication when marketplace is paused
+
+Improved
+
+Ecosystem Operations
+
+    • Ledger Network Filtering: Enhanced admin ledger view
+
+
+    • Filters transactions by configured network (mainnet/testnet)
+
+
+    • Admins only see network-relevant transactions based on environment settings
+
+
+    • Reduces clutter and improves data accuracy for multi-network setups
+
+
+    • Withdrawal Notifications: Admin alerts for transaction failures
+
+
+    • Critical notifications when blockchain withdrawal verification fails
+
+
+    • System and individual admin notifications with transaction details
+
+
+    • Enables immediate manual review and intervention
+
+Payment Processing
+
+    • DLocal Integration Enhancements:
+
+
+    • Deposit Notifications: Users receive immediate in-app notifications for deposit success or failure
+
+
+    • Clear success messages with deposit details
+
+
+    • Failure notifications with error explanations
+
+
+    • Email notifications ready for integration
+
+
+    • Refund Handling: Automated wallet deduction with user and admin notifications
+
+
+    • Detects full and partial refunds from payment provider
+
+
+    • Automatically adjusts user wallet balance
+
+
+    • Prevents negative balances with safety checks
+
+
+    • Notifies users and admins with refund details
+
+
+    • Chargeback Protection: Critical fraud detection and prevention system
+
+
+    • Automatically detects chargebacks from payment provider
+
+
+    • Deducts chargeback amount from user wallet
+
+
+    • Sends critical alerts to all admins for immediate review
+
+
+    • Detailed logging for compliance and audit requirements
+
+
+    • Special handling for missing wallet scenarios
+
+
+    • Paysafe Admin Profit Recording: Fixed profit tracking for deposit fees
+
+
+    • Admin profit now properly recorded for Paysafe deposit fees
+
+
+    • Consistent tracking across all payment providers
+
+
+    • Accurate fee revenue reporting
+
+User Management
+
+    • Investment History: Enabled duration column sorting
+
+
+    • Users can now sort investment history by duration
+
+
+    • Better data organization and easier filtering
+
+
+    • Improved portfolio management experience
+
+
+    • User Import: Welcome notifications for imported users
+
+
+    • Newly imported users receive personalized welcome messages
+
+
+    • In-app greeting with account details
+
+
+    • Better onboarding experience for bulk-imported users
+
+Code Quality
+
+    • OTP Recovery Codes: Verified correct implementation
+
+
+    • Accepts both hyphenated (XXXX-XXXX-XXXX) and plain (XXXXXXXXXXXX) formats
+
+
+    • Generates exactly 12 unique recovery codes per user
+
+
+    • Proper normalization and validation working as designed
+
+
+    • Code Cleanup: Comprehensive code audit completed
+
+
+    • All commented code serves legitimate documentation purposes
+
+
+    • No dead or unnecessary code found
+
 Fixed
 
+Build System
+
+    • TypeScript Compilation: Fixed type mismatches preventing successful builds
 
 
-
-Binary Options Trading
-• Investment Return on Wins: Fixed critical issue where winning trades only returned profit without the original investment
-• Users were losing their investment amount on every winning trade
-• Example: $100 investment with 87% profit should return $187, but only returned $87
-• Balance calculations now correctly return investment + profit on winning trades
-• Applies to all trading modes (demo and real)
-• Profit Percentage Configuration: Fixed hardcoded 88% profit being used instead of configured duration-specific percentages
-• System was ignoring admin-configured profit percentages in binary_duration table
-• All durations showed 88% profit regardless of settings
-• Profit percentages now dynamically loaded from database per duration
-• Admins can now customize profit percentages for each time duration (1min, 5min, 15min, etc.)
-• Profit percentage properly stored with each order for historical accuracy
+    • Resolved async/await pattern errors
 
 
+    • Fixed property name mismatches in data structures
 
 
-P2P Trading
-• Database Schema: Fixed "Can't create table p2p_trades (errno: 150 'Foreign key constraint is incorrectly formed')" error
-• Root cause: Type mismatch between paymentMethod field (VARCHAR) and payment method ID reference (UUID)
-• Updated paymentMethod field to use UUID type for proper foreign key constraint
-• Enables proper relationship between trades and payment methods
+    • Backend now compiles without errors
+
+Database
+
+    • MySQL Compatibility: Fixed JSON syntax in P2P offer expiry handling
 
 
+    • Corrected JSON parsing for MySQL/MariaDB compatibility
 
+
+    • Proper offer expiration processing
+
+Assets
+
+    • Missing Cryptocurrency Image: Added FDUSD (First Digital USD) stablecoin image
+
+
+    • Prevents broken image errors in crypto listings
+
+
+    • Maintains visual consistency across all supported cryptocurrencies
 
 Migration Notes
 
+No database migrations required. All changes are backward compatible and do not require schema updates.
+
+Future Integration Points
+
+The following infrastructure is ready with clear integration markers:
+
+Email Service Integration:
+
+    • Deposit success/failure notifications
 
 
-
-Database Migration Required
-
-
-IMPORTANT: This update requires dropping and recreating the p2p_trades table due to schema changes.
-
-Steps to perform migration:
-
-Backup your database before proceeding
-Run the following SQL commands (or use phpMyAdmin):
-   ``sql
-
-   SET FOREIGN_KEY_CHECKS = 0;
-
-   DROP TABLE IF EXISTS p2p_trades;
-
-   SET FOREIGN_KEY_CHECKS = 1;
-
-   `
-
-Alternative (phpMyAdmin):
-• Open phpMyAdmin and select your database
-• Find the p2p_trades table in the table list and click "Drop"
-• When the confirmation dialog appears, uncheck the "Enable foreign key checks" checkbox
-• Click "Yes" to confirm the drop operation
-• Repeat for p2p_disputes and p2p_reviews` tables
-Restart your backend application
-The tables will be recreated automatically with the correct schema
+    • User import welcome emails
 
 
-Note: This migration will delete all existing P2P trades, disputes, and reviews.
+    • Simply implement email service and follow the TODO comments in code
+
+Security Monitoring Integration:
+
+    • Frontend error reporting (Sentry, DataDog, etc.)
+
+
+    • Optional external monitoring for production environments
