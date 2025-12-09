@@ -1,278 +1,53 @@
-Update Notes - Core 5.7.2
+Update Notes - Core 5.7.7 
 Update Notes
-Added
 
-Ecosystem Trading
+Important: Pre-Update Instructions
+Before running the update, you MUST restart your VPS/server: 1. Restart your VPS (reboot the entire server) 2. After reboot, run pnpm install to update dependencies 3. Rebuild and start your application Failure to restart the server before updating may cause build failures or runtime errors due to cached processes and memory issues.
+Security Fixes
 
-    • Market Data WebSocket: Implemented real-time trades and OHLCV (candlestick) data streaming
+    Dependency Updates: Updated to Next.js 16.1.0-canary.15 to address Turbopack stability issues
+    Server External Packages: Added serverExternalPackages configuration to properly isolate server-only modules (ioredis, sharp, pino, pino-pretty)
+    Build Configuration: Improved Turbopack configuration to prevent worker_threads bundling issues
 
+Changed
+Frontend Build System
 
-    • Live trade history showing recent buy/sell transactions with prices and amounts
+    Next.js 16 Canary: Upgraded to Next.js 16.1.0-canary.15 for improved Turbopack stability
+    Turbopack Configuration: Updated next.config.js with proper server external packages to fix NftJsonAsset: cannot handle filepath worker_threads build error
+    Removed Deprecated Config: Cleaned up deprecated experimental.serverComponentsExternalPackages in favor of top-level serverExternalPackages
 
+New Extension: Payment Gateway
+This release introduces the Payment Gateway extension, enabling merchants to accept cryptocurrency payments from external websites and applications.
+Key Features
 
-    • Real-time candlestick charts with configurable intervals (1m, 5m, 1h, 1d, etc.)
+    Multi-Wallet Payment Support: Customers can pay using multiple wallets and currencies in a single transaction
+    Flexible Allocations: Split payments across FIAT, SPOT, and ECO wallet types
+    Real-time Exchange Rates: Automatic currency conversion with live market rates
+    Merchant Dashboard: Complete analytics, payment history, and payout management
+    API Integration: RESTful API with webhooks for seamless third-party integration
+    WooCommerce Plugin: Ready-to-use WordPress/WooCommerce integration
+    Test Mode: Full sandbox environment for development and testing
 
+Merchant Features
 
-    • Automatic updates only when new data is available to reduce bandwidth
+    Payment Management: View all incoming payments with detailed transaction history
+    Refund Processing: Issue full or partial refunds to customers
+    API Keys: Generate and manage API keys for integration
+    Payout Tracking: Monitor pending and completed payouts
+    Balance Overview: Real-time view of available and pending balances per currency
 
+Admin Features
 
-    • Supports custom data limits for different chart requirements
+    Merchant Management: Approve, suspend, or manage merchant accounts
+    Payment Oversight: Monitor all platform payments with filtering and search
+    Payout Approval: Review and approve merchant payout requests
+    Platform Analytics: Revenue tracking, transaction volumes, and fee collection
+    Global Settings: Configure fees, payout schedules, and payment limits
 
+Technical Implementation
 
-    • Properly handles high-volume trading data from Scylla database
+    Allocation-Based Payments: Payments store allocations as JSON column for multi-wallet support
+    Gateway Balance Tracking: Dedicated gatewayMerchantBalance table tracks pending/available funds separately from wallet balances
+    Secure Fund Flow: Funds held in gateway balance until admin-approved payout
+    Webhook System: Real-time notifications for payment events (completed, refunded, failed)
 
-NFT Marketplace
-
-    • Auction Enhancements: Dynamic minimum bid increment functionality
-
-
-    • Admins can configure minimum bid increments per auction
-
-
-    • Ensures fair bidding with customizable increment requirements
-
-
-    • Prevents bid sniping with proper increment enforcement
-
-
-    • Collection Watchers: Watchers count tracking
-
-
-    • Users can watch/unwatch NFT collections they're interested in
-
-
-    • Real-time watcher count display on collection pages
-
-
-    • Helps gauge collection popularity and community interest
-
-
-    • Withdrawal Tracking: Proper pending withdrawal status
-
-
-    • Clear status indicators for NFT withdrawal requests
-
-
-    • Accurate tracking throughout the withdrawal process
-
-
-    • Better user experience for NFT transfers
-
-
-    • Collection Deployment: Seamless frontend to backend connection
-
-
-    • Smooth NFT collection deployment workflow
-
-
-    • Proper error handling and status updates during deployment
-
-
-    • Smart contract deployment integration
-
-
-    • Marketplace Pause Status: Emergency pause functionality
-
-
-    • Admins can pause/unpause marketplace trading when needed
-
-
-    • Emergency stop for security incidents or maintenance
-
-
-    • Clear UI indication when marketplace is paused
-
-Improved
-
-Ecosystem Operations
-
-    • Ledger Network Filtering: Enhanced admin ledger view
-
-
-    • Filters transactions by configured network (mainnet/testnet)
-
-
-    • Admins only see network-relevant transactions based on environment settings
-
-
-    • Reduces clutter and improves data accuracy for multi-network setups
-
-
-    • Withdrawal Notifications: Admin alerts for transaction failures
-
-
-    • Critical notifications when blockchain withdrawal verification fails
-
-
-    • System and individual admin notifications with transaction details
-
-
-    • Enables immediate manual review and intervention
-
-Payment Processing
-
-    • DLocal Integration Enhancements:
-
-
-    • Deposit Notifications: Users receive immediate in-app notifications for deposit success or failure
-
-
-    • Clear success messages with deposit details
-
-
-    • Failure notifications with error explanations
-
-
-    • Email notifications ready for integration
-
-
-    • Refund Handling: Automated wallet deduction with user and admin notifications
-
-
-    • Detects full and partial refunds from payment provider
-
-
-    • Automatically adjusts user wallet balance
-
-
-    • Prevents negative balances with safety checks
-
-
-    • Notifies users and admins with refund details
-
-
-    • Chargeback Protection: Critical fraud detection and prevention system
-
-
-    • Automatically detects chargebacks from payment provider
-
-
-    • Deducts chargeback amount from user wallet
-
-
-    • Sends critical alerts to all admins for immediate review
-
-
-    • Detailed logging for compliance and audit requirements
-
-
-    • Special handling for missing wallet scenarios
-
-
-    • Paysafe Admin Profit Recording: Fixed profit tracking for deposit fees
-
-
-    • Admin profit now properly recorded for Paysafe deposit fees
-
-
-    • Consistent tracking across all payment providers
-
-
-    • Accurate fee revenue reporting
-
-User Management
-
-    • Investment History: Enabled duration column sorting
-
-
-    • Users can now sort investment history by duration
-
-
-    • Better data organization and easier filtering
-
-
-    • Improved portfolio management experience
-
-
-    • User Import: Welcome notifications for imported users
-
-
-    • Newly imported users receive personalized welcome messages
-
-
-    • In-app greeting with account details
-
-
-    • Better onboarding experience for bulk-imported users
-
-Code Quality
-
-    • OTP Recovery Codes: Verified correct implementation
-
-
-    • Accepts both hyphenated (XXXX-XXXX-XXXX) and plain (XXXXXXXXXXXX) formats
-
-
-    • Generates exactly 12 unique recovery codes per user
-
-
-    • Proper normalization and validation working as designed
-
-
-    • Code Cleanup: Comprehensive code audit completed
-
-
-    • All commented code serves legitimate documentation purposes
-
-
-    • No dead or unnecessary code found
-
-Fixed
-
-Build System
-
-    • TypeScript Compilation: Fixed type mismatches preventing successful builds
-
-
-    • Resolved async/await pattern errors
-
-
-    • Fixed property name mismatches in data structures
-
-
-    • Backend now compiles without errors
-
-Database
-
-    • MySQL Compatibility: Fixed JSON syntax in P2P offer expiry handling
-
-
-    • Corrected JSON parsing for MySQL/MariaDB compatibility
-
-
-    • Proper offer expiration processing
-
-Assets
-
-    • Missing Cryptocurrency Image: Added FDUSD (First Digital USD) stablecoin image
-
-
-    • Prevents broken image errors in crypto listings
-
-
-    • Maintains visual consistency across all supported cryptocurrencies
-
-Migration Notes
-
-No database migrations required. All changes are backward compatible and do not require schema updates.
-
-Future Integration Points
-
-The following infrastructure is ready with clear integration markers:
-
-Email Service Integration:
-
-    • Deposit success/failure notifications
-
-
-    • User import welcome emails
-
-
-    • Simply implement email service and follow the TODO comments in code
-
-Security Monitoring Integration:
-
-    • Frontend error reporting (Sentry, DataDog, etc.)
-
-
-    • Optional external monitoring for production environments
