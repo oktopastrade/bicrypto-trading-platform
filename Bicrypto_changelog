@@ -1,53 +1,340 @@
-Update Notes - Core 5.7.7 
-Update Notes
+Overview
 
-Important: Pre-Update Instructions
-Before running the update, you MUST restart your VPS/server: 1. Restart your VPS (reboot the entire server) 2. After reboot, run pnpm install to update dependencies 3. Rebuild and start your application Failure to restart the server before updating may cause build failures or runtime errors due to cached processes and memory issues.
-Security Fixes
+Version 6.0.2 focuses on a complete redesign of the admin settings experience across all extensions, introduces a new interactive API documentation system, adds dynamic social link management, improves the notification center, and delivers important bug fixes for homepage stability and notification sounds.
 
-    Dependency Updates: Updated to Next.js 16.1.0-canary.15 to address Turbopack stability issues
-    Server External Packages: Added serverExternalPackages configuration to properly isolate server-only modules (ioredis, sharp, pino, pino-pretty)
-    Build Configuration: Improved Turbopack configuration to prevent worker_threads bundling issues
+🚀 Major New Features
 
-Changed
-Frontend Build System
+Unified Admin Settings System
 
-    Next.js 16 Canary: Upgraded to Next.js 16.1.0-canary.15 for improved Turbopack stability
-    Turbopack Configuration: Updated next.config.js with proper server external packages to fix NftJsonAsset: cannot handle filepath worker_threads build error
-    Removed Deprecated Config: Cleaned up deprecated experimental.serverComponentsExternalPackages in favor of top-level serverExternalPackages
+A completely redesigned settings system that provides a consistent, modern experience across all admin settings pages:
 
-New Extension: Payment Gateway
-This release introduces the Payment Gateway extension, enabling merchants to accept cryptocurrency payments from external websites and applications.
-Key Features
+    • Unified Settings Component: All extension settings pages now share a common, beautifully designed interface
 
-    Multi-Wallet Payment Support: Customers can pay using multiple wallets and currencies in a single transaction
-    Flexible Allocations: Split payments across FIAT, SPOT, and ECO wallet types
-    Real-time Exchange Rates: Automatic currency conversion with live market rates
-    Merchant Dashboard: Complete analytics, payment history, and payout management
-    API Integration: RESTful API with webhooks for seamless third-party integration
-    WooCommerce Plugin: Ready-to-use WordPress/WooCommerce integration
-    Test Mode: Full sandbox environment for development and testing
 
-Merchant Features
+    • Tab-Based Organization: Settings are organized into logical tabs with smooth animations and visual indicators
 
-    Payment Management: View all incoming payments with detailed transaction history
-    Refund Processing: Issue full or partial refunds to customers
-    API Keys: Generate and manage API keys for integration
-    Payout Tracking: Monitor pending and completed payouts
-    Balance Overview: Real-time view of available and pending balances per currency
 
-Admin Features
+    • Field Type Support: Support for switches, text inputs, numbers, ranges, URLs, selects, file uploads, and custom components
 
-    Merchant Management: Approve, suspend, or manage merchant accounts
-    Payment Oversight: Monitor all platform payments with filtering and search
-    Payout Approval: Review and approve merchant payout requests
-    Platform Analytics: Revenue tracking, transaction volumes, and fee collection
-    Global Settings: Configure fees, payout schedules, and payment limits
 
-Technical Implementation
+    • Quick Stats Badges: Each tab shows at-a-glance counts of toggles, selects, and other field types
 
-    Allocation-Based Payments: Payments store allocations as JSON column for multi-wallet support
-    Gateway Balance Tracking: Dedicated gatewayMerchantBalance table tracks pending/available funds separately from wallet balances
-    Secure Fund Flow: Funds held in gateway balance until admin-approved payout
-    Webhook System: Real-time notifications for payment events (completed, refunded, failed)
 
+    • Conditional Fields: Settings can show/hide based on other setting values
+
+
+    • Real-Time Validation: Instant feedback on setting changes with unsaved changes tracking
+
+
+    • Responsive Design: Fully responsive layout that works on all screen sizes
+
+New Interactive API Documentation
+
+Replaced the old Swagger UI with a brand new, custom-built API documentation system:
+
+    • Modern Interface: Clean, intuitive interface with collapsible endpoint groups
+
+
+    • Interactive Playground: Test API endpoints directly from the documentation
+
+
+    • Code Generation: Auto-generated code examples in multiple languages:
+
+
+    • cURL
+
+
+    • JavaScript (Fetch)
+
+
+    • Python (Requests)
+
+
+    • PHP
+
+
+    • Go
+
+
+    • Ruby
+
+
+    • Schema Visualization: Interactive schema viewer showing request/response structures
+
+
+    • Search & Filter: Quick search to find endpoints by name, path, or description
+
+
+    • Method Badges: Color-coded badges for GET, POST, PUT, DELETE methods
+
+
+    • Copy to Clipboard: One-click copy for all code examples
+
+
+    • Dark Mode Support: Full dark mode support matching the platform theme
+
+Dynamic Social Links Management
+
+    • Custom Social Links: Administrators can now add, edit, and remove social links from the footer
+
+
+    • Icon Library: Pre-built icons for popular platforms (Twitter, Facebook, Instagram, LinkedIn, Telegram, Discord, GitHub, Reddit, TikTok, YouTube)
+
+
+    • Custom Icons: Support for custom icon URLs for any platform
+
+
+    • Drag & Drop Ordering: Reorder social links with intuitive drag and drop
+
+
+    • Live Preview: See changes instantly in the footer preview
+
+Extension Landing Page Footer
+
+All extension landing pages now feature the main site footer (SiteFooter) for better navigation:
+
+    • Consistent Footer: Landing pages for all extensions (staking, affiliate, copy-trading, etc.) show the full site footer
+
+
+    • Subpage Footer: Non-landing pages within extensions show the standard dashboard footer
+
+
+    • Reusable Wrapper: New ExtensionLayoutWrapper component handles footer logic based on current path
+
+
+    • Custom Subpage Footers: Extensions can optionally provide their own custom footer for subpages (e.g., NFT's minimal footer)
+
+Extension Settings Redesigned
+
+All extension admin settings pages have been redesigned with the new unified system:
+
+System Settings
+
+    • Modern tabbed interface with General, Features, Wallet, Social, and Logos tabs
+
+
+    • Logo field with preview and size recommendations
+
+
+    • Social links management integrated
+
+Blog Settings
+
+    • Reorganized into General, Features, Display, Comments, and Notifications tabs
+
+
+    • Cleaner layout with better field groupings
+
+Affiliate Settings
+
+    • New MLM levels editor with visual tier management
+
+
+    • Commission settings with percentage sliders
+
+
+    • Referral tracking configuration
+
+AI Market Maker Settings
+
+    • Trading parameters with range sliders
+
+
+    • Risk management settings
+
+
+    • Emergency actions panel for quick interventions
+
+Copy Trading Settings
+
+    • Leader and follower configuration tabs
+
+
+    • Commission and fee settings
+
+
+    • Risk management controls
+
+E-commerce Settings
+
+    • Product display options
+
+
+    • Checkout configuration
+
+
+    • Inventory management settings
+
+Gateway Settings
+
+    • Wallet types selector with currency configuration
+
+
+    • Fee and limit management
+
+
+    • Webhook retry settings
+
+NFT Marketplace Settings
+
+    • Trading fees with percentage sliders
+
+
+    • Content moderation settings
+
+
+    • Verification requirements
+
+P2P Trading Settings
+
+    • Minimum trade amounts by currency
+
+
+    • Payment method configuration
+
+
+    • Dispute resolution settings
+
+Staking Settings
+
+    • Pool creation parameters
+
+
+    • Reward distribution settings
+
+
+    • Lock period configuration
+
+Bug Fixes
+
+Homepage Stability
+
+    • Fixed Scroll Animation Error: Resolved "Target ref is defined but not hydrated" error that occurred when navigating to the homepage
+
+
+    • Mobile App Section Fix: Fixed the same hydration issue in the mobile app section's parallax animations
+
+
+    • Smoother Transitions: Page transitions no longer cause animation-related errors
+
+Notification Sound Glitch
+
+    • Fixed Audio Glitch on Page Load: Notification sound no longer makes a brief glitch sound when pages load
+
+
+    • Lazy Audio Loading: Sound files are now loaded only after user interaction, preventing autoplay issues
+
+
+    • Silent Unlock: Audio system unlocks silently without playing any audible sound
+
+
+    • Better Browser Compatibility: Improved handling for iOS Safari and other restrictive browsers
+
+Settings Quick Stats
+
+    • Fixed Empty Badges: Settings tabs no longer show "0 toggles" or "0 selects" badges when there are no fields of that type
+
+
+    • Conditional Display: Badges only appear when there are actual fields to count
+
+Rich Text Editor
+
+    • Simplified Editor Component: Streamlined the editor component for better performance
+
+
+    • Removed Quill Dependency: Editor now uses a lighter-weight implementation
+
+Notification Page
+
+    • Filter Spacing: Fixed "1Active filter" text to properly show space between count and word
+
+UI/UX Enhancements
+
+Notification Center Redesign
+
+The notification page has been completely revamped with modern UI patterns:
+
+    • Sticky Headers with IntersectionObserver: Date headers stick to the top when scrolling, with smooth transitions as new dates come into view
+
+
+    • Custom Tab System: Replaced standard tabs with custom Framer Motion animated tabs featuring layoutId for smooth indicator transitions
+
+
+    • Filter Chips: Modern filter chip interface for selecting notification types
+
+
+    • Improved Mobile Experience: Better responsive design with optimized spacing and touch targets
+
+
+    • Enhanced Visual Hierarchy: Clear separation between notification groups with improved typography
+
+Footer Redesign
+
+    • Dynamic Content: Footer now dynamically shows/hides sections based on enabled extensions
+
+
+    • Social Links Integration: Custom social links from settings appear automatically
+
+
+    • Better Organization: Cleaner layout with improved navigation links
+
+
+    • Responsive Grid: Better mobile layout with proper stacking
+
+Admin Settings Pages
+
+    • Consistent Design Language: All settings pages now share the same visual style
+
+
+    • Animated Transitions: Smooth tab transitions and field animations
+
+
+    • Better Error States: Clear error indicators and validation messages
+
+
+    • Loading States: Skeleton loaders while settings are being fetched
+
+API Documentation Page
+
+    • Sidebar Navigation: Collapsible sidebar with endpoint grouping
+
+
+    • Sticky Headers: Endpoint headers stay visible while scrolling
+
+
+    • Response Examples: Formatted JSON response examples
+
+
+    • Parameter Tables: Clear tables showing required and optional parameters
+
+Performance Improvements
+
+Settings System
+
+    • Reduced Bundle Size: Removed redundant per-extension setting components
+
+
+    • Shared Components: Single set of reusable components for all settings pages
+
+
+    • Optimized Re-renders: Better memoization in settings forms
+
+API Documentation
+
+    • Removed Swagger UI: Replaced heavy Swagger UI bundle with lightweight custom implementation
+
+
+    • On-Demand Loading: Documentation content loads as needed
+
+
+    • Cached OpenAPI Spec: API specification is cached to reduce server load
+
+Notification System
+
+    • Lazy Audio Initialization: Audio element created without source until needed
+
+
+    • Throttled Playback: Prevents audio spam with 1-second minimum between sounds
+
+
+    • Memory Efficient: Audio resources properly cleaned up
