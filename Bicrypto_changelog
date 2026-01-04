@@ -1,340 +1,476 @@
+Core v6.0.3
+
+Release Date: January 1, 2026 Tags: MAJOR UPDATE, BINARY TRADING OVERHAUL, TRADING PRO, PATTERN LIBRARY, EMAIL SYSTEM, PERFORMANCE, ADMIN DASHBOARDS
+⚠️ Important: Update Instructions
+
+This is a significant update that requires specific steps to complete successfully:
+Update Steps
+
+    1Delete the /backend/src and /backend/dist and frontend/app/[locale]/(ext) folders completely from your server
+    2Download the latest Core and all addons from Envato
+    3Extract all files to your public_html directory
+    4Run the updator: Execute pnpm updator to perform the update
+    5Seed notification templates (optional but recommended):
+
+bash
+
+   pnpm seed:notification
+
+This command will populate the new notification email templates
+Post-Update Checklist
+
+    Verify all email templates are rendering correctly
+    Test the new trading interface
+    Check binary trading features are working
+    Confirm admin dashboards display properly
+
 Overview
 
-Version 6.0.2 focuses on a complete redesign of the admin settings experience across all extensions, introduces a new interactive API documentation system, adds dynamic social link management, improves the notification center, and delivers important bug fixes for homepage stability and notification sounds.
-
+Version 6.0.3 is a comprehensive update that completely overhauls the binary trading system with 5 new order types and advanced gamification, introduces a professional-grade Trading Pro interface with responsive collapsible panels, adds a pattern library with 62+ patterns, redesigns all email templates, and includes major performance improvements with lazy database synchronization reducing server startup from 15 seconds to under 0.01 seconds.
 🚀 Major New Features
+Complete Binary Trading Overhaul
 
-Unified Admin Settings System
+A ground-up redesign of the entire binary trading experience with professional-grade features:
+› 5 Binary Order Types
 
-A completely redesigned settings system that provides a consistent, modern experience across all admin settings pages:
+    Rise/Fall: Classic prediction if price will rise or fall
+    Higher/Lower: Predict price will close above or below a barrier level
+    Touch/No Touch: Predict if price will touch or avoid a barrier level during the contract
+    Call/Put: Options-style trading with strike prices and payout-per-point calculations
+    Turbo: Fast-paced trading with barrier breach detection and dynamic payouts
 
-    • Unified Settings Component: All extension settings pages now share a common, beautifully designed interface
+Each order type includes:
 
+    Individual profit percentage configurations
+    Min/max duration settings
+    Barrier and strike price support where applicable
+    Separate enable/disable for demo and live trading
 
-    • Tab-Based Organization: Settings are organized into logical tabs with smooth animations and visual indicators
+› Gamification System
 
+Leaderboard:
 
-    • Field Type Support: Support for switches, text inputs, numbers, ranges, URLs, selects, file uploads, and custom components
+    Daily, Weekly, Monthly, and All-Time rankings
+    Multiple ranking metrics: Profit, Win Rate, Volume
+    Personal rank display with percentile and qualification status
+    Top 100 traders with avatar display and detailed statistics
 
+Challenges & Achievements:
 
-    • Quick Stats Badges: Each tab shows at-a-glance counts of toggles, selects, and other field types
+    16 Daily Challenges (first trade, win streaks, profit targets, etc.)
+    12 Weekly Challenges (25-100 trades, 55-70% win rate targets, etc.)
+    40+ Achievements (milestones, streaks, consistency badges)
+    Reward types: XP, Badges, Demo bonus, Special titles
 
+20-Level Progression System:
 
-    • Conditional Fields: Settings can show/hide based on other setting values
+    Progression from "Newcomer" to "Grandmaster"
+    XP-based leveling with cumulative requirements (0 to 100,000 XP)
+    Difficulty-based XP multipliers (Easy 1x to Legendary 3x)
+    Visual progress tracking with celebration animations
 
+› Advanced Trading Settings
 
-    • Real-Time Validation: Instant feedback on setting changes with unsaved changes tracking
+User Trading Controls:
 
+    One-click trading (instant trade without confirmation)
+    Martingale strategy with configurable settings
+    Daily loss limit with auto-disable protection
+    Stop-loss and take-profit thresholds
+    Trade cooldown (minimum wait between trades)
 
-    • Responsive Design: Fully responsive layout that works on all screen sizes
+Position Sizing (4 Methods):
 
-New Interactive API Documentation
+    Fixed amount sizing
+    Percentage of balance
+    Risk-based calculation
+    Custom templates with presets
 
-Replaced the old Swagger UI with a brand new, custom-built API documentation system:
+Sounds & Notifications:
 
-    • Modern Interface: Clean, intuitive interface with collapsible endpoint groups
+    Master notification controls
+    Individual sound effects for every trade event
+    Volume control with test functionality
+    Push notification support with browser permissions
+    Quiet hours scheduling
+    Toast position and duration configuration
 
+› Trading Analytics & Journal
 
-    • Interactive Playground: Test API endpoints directly from the documentation
+    Complete performance statistics (win rate, P&L, best/worst trades)
+    Symbol-by-symbol breakdown
+    Time-based analysis (by hour and day of week)
+    Advanced metrics: Sharpe Ratio, Sortino Ratio, Max Drawdown, Recovery Factor
+    Full trade journal with notes, tags, and ratings
+    Export to CSV functionality
+    Equity curve visualization
+    Win/loss streak tracking
 
+Trading Pro Interface
 
-    • Code Generation: Auto-generated code examples in multiple languages:
+A completely new trading layout designed for professional traders with responsive design across all devices:
+› Panel System
 
+    Markets Panel: Watchlist, spot, futures, and ecosystem markets with real-time ticker
+    Chart Panel: TradingView or Chart Engine integration with full-screen mode
+    Order Book Panel: Real-time order book with 10-level aggregation, depth chart, and trades view
+    Trading Form Panel: Buy/sell interface with spot and futures support, leverage controls
+    Orders Panel: Open orders, order history, and trade history with filtering
+    Positions Panel: Futures positions management
 
-    • cURL
+› Collapsible Panels
 
+    All panels (except chart) can be collapsed to save space
+    Collapsed state persisted to localStorage
+    Smart auto-collapse on smaller screens
+    Visual indicators showing collapse direction
+    Vertical text for side panels, horizontal for bottom panels
 
-    • JavaScript (Fetch)
+› Responsive Design
 
+Desktop (1280px+):
 
-    • Python (Requests)
+    Full 4-column horizontal layout
+    All panels visible with independent sizing
+    Panel widths scale with screen size (220px to 380px)
 
+Tablet (640px-1023px):
 
-    • PHP
+    Vertical stack layout
+    Chart at top, orderbook and trading side-by-side below
+    Orders panel auto-collapsed by default
+    Markets accessible via symbol click modal
 
+Mobile (<640px):
 
-    • Go
+    Dedicated mobile app layout
+    Bottom tab navigation (Chart, Orderbook, Trade, Orders, Positions)
+    Haptic feedback support
+    Safe area handling for notched devices
 
+› Layout Presets
 
-    • Ruby
+    4 built-in presets: Trading Pro, Chart Focus, Scalping, Lite Mode
+    Custom layout saving with names and descriptions
+    Automatic persistence to localStorage
 
+Pattern Library (62+ Patterns)
 
-    • Schema Visualization: Interactive schema viewer showing request/response structures
+A comprehensive pattern detection system for technical analysis:
+› Pattern Categories
 
+Candlestick Patterns (17 patterns):
 
-    • Search & Filter: Quick search to find endpoints by name, path, or description
+    Three White Soldiers, Three Black Crows
+    Morning Star, Evening Star
+    Bullish/Bearish Engulfing
+    Piercing Line, Dark Cloud Cover
+    Hammer, Shooting Star, Inverted Hammer, Hanging Man
+    Doji, Marubozu, Harami
+    Tweezer Top/Bottom, Three Inside Up/Down
 
+Chart Patterns (7 patterns):
 
-    • Method Badges: Color-coded badges for GET, POST, PUT, DELETE methods
+    Double Top, Double Bottom
+    Head & Shoulders, Inverse Head & Shoulders
+    Symmetrical Triangle, Ascending Triangle, Descending Triangle
 
+Harmonic Patterns (4 patterns):
 
-    • Copy to Clipboard: One-click copy for all code examples
+    Gartley, Butterfly, Bat, Crab
+    Fibonacci ratio validation with configurable tolerance
 
+› Pattern Detection Features
 
-    • Dark Mode Support: Full dark mode support matching the platform theme
+    Real-time detection on every candle
+    Strength scoring (0-1 scale)
+    Active pattern tracking (last 10-20 candles)
+    Visual overlays with target lines and stop losses
+    Pattern panel with filtering by category and direction
+    Detailed guidance and trading tips for each pattern
 
-Dynamic Social Links Management
+Email Templates Complete Redesign
 
-    • Custom Social Links: Administrators can now add, edit, and remove social links from the footer
+A total overhaul of the email notification system:
+› New Template Structure
 
+    Professional HTML email designs
+    Responsive layouts for all email clients
+    Consistent branding with header/footer wrapper
+    Dynamic variable support for personalization
 
-    • Icon Library: Pre-built icons for popular platforms (Twitter, Facebook, Instagram, LinkedIn, Telegram, Discord, GitHub, Reddit, TikTok, YouTube)
+› Notification Template Manager
 
+Three-Panel Interface:
 
-    • Custom Icons: Support for custom icon URLs for any platform
+    Left Panel: Searchable template list with 13 categories
+    Center Panel: WYSIWYG HTML editor with subject line editing
+    Right Panel: Variable reference with one-click insertion
 
+Template Categories (13):
 
-    • Drag & Drop Ordering: Reorder social links with intuitive drag and drop
+    Authentication, Wallet & Transactions, Trading
+    Copy Trading, Investments, Forex, Staking
+    ICO & Token Sales, KYC & Verification
+    Support & Tickets, E-commerce, Author & Content
+    P2P Trading, System
 
+Features:
 
-    • Live Preview: See changes instantly in the footer preview
+    Real-time change tracking with unsaved indicator
+    Multi-channel preparation (Email, SMS, Push)
+    Template-specific variable filtering
+    Preview with wrapper template
+    Variable validation
 
-Extension Landing Page Footer
+New Admin Dashboards
 
-All extension landing pages now feature the main site footer (SiteFooter) for better navigation:
+Comprehensive dashboard pages for all major trading modules:
+› P2P Trading Dashboard
 
-    • Consistent Footer: Landing pages for all extensions (staking, affiliate, copy-trading, etc.) show the full site footer
+    Total Offers, Active Trades, Open Disputes, Platform Revenue stats
+    Trading Overview chart with volume and revenue trends
+    Currency distribution and active offers comparison
+    Platform health gauge with top traders leaderboard
 
+› Futures Dashboard
 
-    • Subpage Footer: Non-landing pages within extensions show the standard dashboard footer
+    Total Positions, Active Positions, Total Volume, Total P&L stats
+    Long/Short ratio visualization
+    Trading activity charts and top markets list
+    Recent positions table with full details
 
+› AI Investment Dashboard
 
-    • Reusable Wrapper: New ExtensionLayoutWrapper component handles footer logic based on current path
+    Investment metrics with Win/Loss/Draw breakdown
+    Investment type distribution (Spot vs Eco)
+    Volume charts and plan distribution
+    Active plans list with recent investments
 
+› Forex Dashboard
 
-    • Custom Subpage Footers: Extensions can optionally provide their own custom footer for subpages (e.g., NFT's minimal footer)
+    Investment stats with account breakdowns
+    Live and Demo account tracking
+    Pending deposits/withdrawals monitoring
+    Signal integration
 
-Extension Settings Redesigned
+› Copy Trading Dashboard (Reworked)
 
-All extension admin settings pages have been redesigned with the new unified system:
+    Completely redesigned with modern interface
+    Leader and follower statistics
+    Profit sharing and commission tracking
 
-System Settings
+› Stats Cards System
 
-    • Modern tabbed interface with General, Features, Wallet, Social, and Logos tabs
-
-
-    • Logo field with preview and size recommendations
-
-
-    • Social links management integrated
-
-Blog Settings
-
-    • Reorganized into General, Features, Display, Comments, and Notifications tabs
-
-
-    • Cleaner layout with better field groupings
-
-Affiliate Settings
-
-    • New MLM levels editor with visual tier management
-
-
-    • Commission settings with percentage sliders
-
-
-    • Referral tracking configuration
-
-AI Market Maker Settings
-
-    • Trading parameters with range sliders
-
-
-    • Risk management settings
-
-
-    • Emergency actions panel for quick interventions
-
-Copy Trading Settings
-
-    • Leader and follower configuration tabs
-
-
-    • Commission and fee settings
-
-
-    • Risk management controls
-
-E-commerce Settings
-
-    • Product display options
-
-
-    • Checkout configuration
-
-
-    • Inventory management settings
-
-Gateway Settings
-
-    • Wallet types selector with currency configuration
-
-
-    • Fee and limit management
-
-
-    • Webhook retry settings
-
-NFT Marketplace Settings
-
-    • Trading fees with percentage sliders
-
-
-    • Content moderation settings
-
-
-    • Verification requirements
-
-P2P Trading Settings
-
-    • Minimum trade amounts by currency
-
-
-    • Payment method configuration
-
-
-    • Dispute resolution settings
-
-Staking Settings
-
-    • Pool creation parameters
-
-
-    • Reward distribution settings
-
-
-    • Lock period configuration
-
-Bug Fixes
-
-Homepage Stability
-
-    • Fixed Scroll Animation Error: Resolved "Target ref is defined but not hydrated" error that occurred when navigating to the homepage
-
-
-    • Mobile App Section Fix: Fixed the same hydration issue in the mobile app section's parallax animations
-
-
-    • Smoother Transitions: Page transitions no longer cause animation-related errors
-
-Notification Sound Glitch
-
-    • Fixed Audio Glitch on Page Load: Notification sound no longer makes a brief glitch sound when pages load
-
-
-    • Lazy Audio Loading: Sound files are now loaded only after user interaction, preventing autoplay issues
-
-
-    • Silent Unlock: Audio system unlocks silently without playing any audible sound
-
-
-    • Better Browser Compatibility: Improved handling for iOS Safari and other restrictive browsers
-
-Settings Quick Stats
-
-    • Fixed Empty Badges: Settings tabs no longer show "0 toggles" or "0 selects" badges when there are no fields of that type
-
-
-    • Conditional Display: Badges only appear when there are actual fields to count
-
-Rich Text Editor
-
-    • Simplified Editor Component: Streamlined the editor component for better performance
-
-
-    • Removed Quill Dependency: Editor now uses a lighter-weight implementation
-
-Notification Page
-
-    • Filter Spacing: Fixed "1Active filter" text to properly show space between count and word
-
-UI/UX Enhancements
-
-Notification Center Redesign
-
-The notification page has been completely revamped with modern UI patterns:
-
-    • Sticky Headers with IntersectionObserver: Date headers stick to the top when scrolling, with smooth transitions as new dates come into view
-
-
-    • Custom Tab System: Replaced standard tabs with custom Framer Motion animated tabs featuring layoutId for smooth indicator transitions
-
-
-    • Filter Chips: Modern filter chip interface for selecting notification types
-
-
-    • Improved Mobile Experience: Better responsive design with optimized spacing and touch targets
-
-
-    • Enhanced Visual Hierarchy: Clear separation between notification groups with improved typography
-
-Footer Redesign
-
-    • Dynamic Content: Footer now dynamically shows/hides sections based on enabled extensions
-
-
-    • Social Links Integration: Custom social links from settings appear automatically
-
-
-    • Better Organization: Cleaner layout with improved navigation links
-
-
-    • Responsive Grid: Better mobile layout with proper stacking
-
-Admin Settings Pages
-
-    • Consistent Design Language: All settings pages now share the same visual style
-
-
-    • Animated Transitions: Smooth tab transitions and field animations
-
-
-    • Better Error States: Clear error indicators and validation messages
-
-
-    • Loading States: Skeleton loaders while settings are being fetched
-
-API Documentation Page
-
-    • Sidebar Navigation: Collapsible sidebar with endpoint grouping
-
-
-    • Sticky Headers: Endpoint headers stay visible while scrolling
-
-
-    • Response Examples: Formatted JSON response examples
-
-
-    • Parameter Tables: Clear tables showing required and optional parameters
+    New unified StatsCard component across all admin pages
+    12 pre-defined color schemes
+    Sparkline chart support
+    Change badges with growth indicators
+    Glassmorphism styling with animations
 
 Performance Improvements
+Lazy Database Synchronization
 
-Settings System
+Revolutionary improvement to server startup time:
 
-    • Reduced Bundle Size: Removed redundant per-extension setting components
+    Before: ~15 seconds to start server
+    After: ~0.01 seconds to start server (1500x faster)
 
+How it works:
 
-    • Shared Components: Single set of reusable components for all settings pages
+    Computes hash of all database models
+    Only runs ALTER sync if models have changed
+    Otherwise, just authenticates connection
+    Configurable modes: none, lazy (default), always, force
 
+New Locales System
 
-    • Optimized Re-renders: Better memoization in settings forms
+Completely reworked internationalization:
 
-API Documentation
+    Size reduction: 99.98% smaller locale files per page
+    Full TypeScript support with auto-generated types
+    Auto-generation of locale files from source
+    Support for 90 languages with complete translations
+    Code-split locales loaded per-page
 
-    • Removed Swagger UI: Replaced heavy Swagger UI bundle with lightweight custom implementation
+Additional Features
+Binary Trading Admin Settings
 
+Order Type Configuration:
 
-    • On-Demand Loading: Documentation content loads as needed
+    Enable/disable individual order types
+    Min/max trade amounts per type
+    Payout percentage ranges
+    Duration limits
+    Max concurrent orders per user
 
+Barriers & Strikes:
 
-    • Cached OpenAPI Spec: API specification is cached to reduce server load
+    Configurable barrier distances for Higher/Lower, Touch/No Touch, Turbo
+    Strike price distances for Call/Put
+    Payout-per-point settings
 
-Notification System
+Duration Management:
 
-    • Lazy Audio Initialization: Audio element created without source until needed
+    New duration configuration replacing old table
+    Smart adjustment per interval for all order types
+    Min time and max time settings
 
+Cancellation Rules:
 
-    • Throttled Playback: Prevents audio spam with 1-second minimum between sounds
+    Minimum time before expiry for cancellation
+    Penalty percentage by duration
+    Order placement and cancellation buffers
 
+Risk Management:
 
-    • Memory Efficient: Audio resources properly cleaned up
+    Auto-disable trading when loss limits reached
+    Win rate threshold alerts
+    Per-user limits (orders/minute, orders/hour, daily loss)
+    Cooling period after max loss
+
+Payout Optimizer:
+
+    One-click optimization across all intervals and order types
+    3 built-in presets for common configurations
+
+Addons & Integrations Manager
+
+    New unified page for all addons with details
+    Addon status, version, and configuration
+    Quick enable/disable toggles
+
+System Updates
+
+    New system updates page
+    Extensions update management
+    License activation interface
+    License verification system
+    Security system to prevent unauthorized platform use
+
+Licensing System (Reworked)
+
+    Get updates from new API without active support
+    Automated license verification
+    Improved update delivery
+
+Maintenance Mode
+
+Automatic maintenance page system that activates when the server is stopped:
+
+Features:
+
+    Beautiful, crypto-themed maintenance page with animations
+    Automatically starts when you run pnpm stop
+    Automatically stops when you run pnpm start
+    Runs independently of Next.js (lightweight Node.js server)
+    Serves on both frontend (port 3000) and backend (port 4000)
+    Returns proper 503 status for API requests with JSON response
+    Auto-refreshes every 30 seconds to check if site is back
+
+Maintenance Page Display:
+
+    Professional crypto trading platform design
+    Animated status bar showing system status
+    Progress tracker with maintenance steps
+    Floating particles and gradient background
+    Mobile responsive design
+
+Usage:
+bash
+
+# Stop servers and show maintenance page
+pnpm stop
+
+# Start servers (automatically hides maintenance page)
+pnpm start
+
+# Manual maintenance control (if needed)
+pnpm maintenance:start
+pnpm maintenance:stop
+
+Bug Fixes
+Trading
+
+    Fixed race condition issue in copy trading
+    Fixed use of copy trading wallet in market orders
+    Fixed binary navigation where new markets replaced old ones instead of adding
+
+Ecosystem
+
+    Fixed ecosystem section in landing page
+    Improved error handling for all blockchain master wallet fetching
+    Fixed NFT marketplace pausing process
+
+UI/UX
+
+    Fixed help link in emails sending to non-existing page
+    Fixed affiliate URL generator
+    Improved affiliate conditions UI
+    Deploy new marketplace contract UI improvements
+    Mailwizard template creation page fully reworked
+
+Performance
+
+    Cleaned public folder from all redundant old files and images
+    Improved ecosystem token creation design with detailed guidance
+
+Technical Improvements
+Chart Engine Support
+
+    New Chart Engine option for binary and trading pages
+    Settings to enable/disable Chart Engine vs TradingView
+    Full feature parity between chart providers
+
+Exchange Provider
+
+    Reworked to use only enabled provider directly
+    No longer requires selecting provider first
+    Cleaner configuration interface
+
+Chart Data Management (Admin)
+
+New admin page for managing historical chart data cache at /admin/finance/exchange/chart:
+
+Statistics & Overview:
+
+    View all enabled markets with chart data statistics
+    See candle counts, file sizes, and date ranges per interval
+    Gap detection showing missing data in chart history
+    Total cache size monitoring across all markets
+
+Build Chart Data:
+
+    Fetch historical OHLCV data from exchange provider
+    Configurable historical days (1-365 days)
+    Rate limit control to respect exchange API limits
+    Select specific intervals to build (1m, 5m, 15m, 1h, 4h, 1d, etc.)
+    Background job execution with real-time progress tracking
+    Build for all markets or selected markets only
+
+Clean Chart Data:
+
+    Delete cached chart data for selected markets
+    Clean specific intervals or all intervals at once
+    Clears both file cache and Redis cache
+    Bulk selection with select all option
+
+Fix Chart Gaps:
+
+    Automatic gap detection in existing chart data
+    One-click gap filling per market/interval
+    Fetches missing candles from exchange to complete history
+    Rate-limited to avoid exchange API bans
+
+Settings:
+
+    Configure default cache duration (days)
+    Set rate limit for API requests
+    Select default intervals for building
+    Exchange ban status monitoring with countdown
+
+Code Quality
+
+    Complete translation of all strings in 90 locales
+    Improved type safety throughout
+    Better error handling with descriptive messages
