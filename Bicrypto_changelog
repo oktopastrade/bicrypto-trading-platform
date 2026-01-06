@@ -1,678 +1,74 @@
+Core v6.0.6
+
+Release Date: January 5, 2026 Tags: IMPROVEMENTS, BINARY TRADING, SECURITY
 Overview
 
-Version 6.0.4 introduces three major architectural improvements: a comprehensive Centralized Wallet Service, a Multi-Channel Notification Service, and Database-Backed Settings System. The wallet service consolidates all wallet operations across the platform, the notification service provides a unified solution for all platform communications, and the new settings system allows administrators to manage all platform configuration through the admin panel without server restarts. Additionally includes important bug fixes for KYC and binary trading.
+Version 6.0.6 introduces an improved Binary Market management experience with a redesigned creation wizard, and fixes reCAPTCHA integration for more reliable authentication.
 Upgrade Notes
-Step 1: Remove Deprecated Files
+Step 1: Configure reCAPTCHA v3
 
-Run this command from your public_html directory to remove all deprecated files:
-bash
+Important: Before running the updator, you must ensure reCAPTCHA is configured correctly in your .env file. reCAPTCHA v2 is no longer supported - you must use v3.
 
-rm .eslintignore \
-  frontend/.eslintrc.json \
-  "frontend/app/[locale]/(dashboard)/user/profile/components/profile-content.tsx" \
-  "frontend/app/[locale]/(dashboard)/user/profile/components/profile-sidebar.tsx" \
-  "frontend/app/[locale]/(dashboard)/user/profile/components/tabs/dashboard-tab.tsx" \
-  "frontend/app/[locale]/(dashboard)/user/profile/components/tabs/personal-info-tab.tsx" \
-  "frontend/app/[locale]/(dashboard)/user/profile/components/tabs/security-tab.tsx" \
-  "frontend/app/[locale]/(dashboard)/user/profile/components/ui/activity-card.tsx" \
-  "frontend/app/[locale]/(dashboard)/user/profile/components/ui/stat-card.tsx" \
-  "frontend/app/[locale]/(dashboard)/user/profile/components/ui/tab-button.tsx" \
-  "frontend/app/[locale]/(utility)/comming-soon/page.tsx" \
-  "frontend/app/[locale]/(utility)/maintinance/page.tsx"
+    1Follow the complete setup guide: Authentication Setup
+    2When creating your reCAPTCHA keys in Google Admin Console:
 
-Step 2: Update Notification Templates
+    Select reCAPTCHA v3 (NOT v2 - v2 will not work)
+    Add your domains (e.g., yourdomain.com, www.yourdomain.com)
+    Copy both Site Key and Secret Key
 
-Run the following command to update notification templates with SMS and Push content:
-bash
+    1Update your .env file with the v3 keys:
 
-pnpm seed:notification
+env
 
-This will add SMS (160 char limit) and Push (240 char limit) message templates to all existing notification templates, enabling multi-channel notifications.
-Step 3: Generate VAPID Keys for Web Push
+   NEXT_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY="your-v3-site-key"
+   NEXT_PUBLIC_GOOGLE_RECAPTCHA_SECRET_KEY="your-v3-secret-key"
 
-Generate VAPID keys for browser push notifications:
-bash
-
-pnpm vapid:generate
-
-This will prompt for your email and automatically update your .env file with the required VAPID keys.
-Step 4: Run Updator
+::alert{type="warning"} If you previously had reCAPTCHA v2 keys configured, you must generate new v3 keys. v2 keys will not work with this update. ::
+Step 2: Run Updator
 bash
 
 pnpm updator
 
-Step 5: Re-save Settings
-
-After running the updator, visit each of the following settings pages in the admin panel and click Save to ensure all settings are properly initialized in the database:
-
-    1Platform Settings (/admin/settings) - Security, 2FA, and integration settings
-    2Blog Settings (/admin/blog/settings) - Blog status and layout settings
-    3Trading Settings (/admin/trading/settings) - Spot trading settings
-    4Binary Settings (/admin/finance/binary/settings) - Binary trading configuration
-
-> Note: This step is required because the settings system has been migrated from environment variables to the database. Re-saving ensures all default values are properly stored.
-Step 6: Test Notification Service
-
-Visit the Notification Service dashboard to verify all channels are working correctly:
-
-    1Notification Dashboard (/admin/system/notification) - Test all notification channels (IN_APP, EMAIL, SMS, PUSH)
-    2Use the Channel Testing tab to send test notifications to each channel
-    3Verify provider status in the Settings Panel tab
-
-New Features
-Centralized Wallet Service
-
-A complete overhaul of how wallet operations are handled throughout the platform:
-› Single Source of Truth
-
-    All wallet balance operations now flow through one centralized service
-    Eliminates duplicate wallet logic that was previously scattered across 78+ files
-    Consistent behavior for all wallet types: FIAT, SPOT, ECO, FUTURES, and COPY_TRADING
-
-› Atomic Transactions
-
-    All wallet operations are now wrapped in database transactions
-    Prevents partial updates that could lead to balance inconsistencies
-    Automatic rollback on any failure during multi-step operations
-
-› Idempotency Protection
-
-    Every wallet operation requires a unique idempotency key
-    Prevents duplicate credits/debits from retried requests
-    Critical for payment webhook handlers that may receive duplicate notifications
-
-› Row-Level Locking
-
-    Concurrent wallet updates are now properly synchronized
-    Eliminates race conditions that could cause balance discrepancies
-    Uses database-level locking for maximum reliability
-
-› Safe Arithmetic
-
-    All balance calculations now use precision-safe arithmetic
-    Eliminates floating-point errors in financial calculations
-    Configurable precision per currency type
-
-› Dynamic Precision Caching
-
-    Currency precision values are now loaded from database
-    No more hardcoded precision values throughout the codebase
-    Auto-refreshing cache with 5-minute TTL
-
-› Comprehensive Error Handling
-
-    Dedicated error types for common wallet issues:
-    Insufficient funds
-    Wallet not found
-    Duplicate operation
-    Negative balance prevention
-    Wallet disabled
-    Invalid amount
-
-Wallet Operations Supported
-
-The new service handles all wallet operations:
-
-    Credits: Deposits, incoming transfers, refunds, rewards, payouts
-    Debits: Withdrawals, outgoing transfers, fees, payments
-    Holds: Lock funds for pending orders
-    Releases: Return held funds to available balance
-    Transfers: Atomic movement between wallets with optional fees
-    Execute from Hold: Complete trades from held funds
-
-Multi-Chain Address Support
-
-Enhanced ECO wallet creation with support for:
-
-    EVM Chains: Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, Avalanche, Fantom, Linea, Celo
-    UTXO Chains: Bitcoin, Litecoin, Dogecoin, Dash
-    Special Chains: Solana, Tron, Monero, TON
-
-Multi-Channel Notification Service
-
-A complete enterprise-grade notification system that handles all platform communications:
-› Unified Notification Architecture
-
-    Single Service for All Notifications: Centralized NotificationService replaces scattered notification logic across 66+ backend files
-    Multi-Channel Support: IN_APP, EMAIL, SMS, and PUSH notifications from a single API
-    Type Safety: Strongly typed notification types (SYSTEM, INVESTMENT, TRADE, P2P, COPY_TRADING, ICO, STAKING, WALLET, SECURITY, MARKETING, FOREX, BINARY, FUTURES, ECOMMERCE, NFT, ALERT, MESSAGE, USER)
-    Priority Levels: LOW, NORMAL, HIGH, and URGENT for intelligent message routing
-
-› Core Features
-
-Idempotency Protection
-
-    Unique idempotency keys prevent duplicate notifications
-    30-day deduplication window using Redis cache
-    Critical for webhook handlers and retry scenarios
-
-User Preferences
-
-    Respects per-user, per-type notification preferences
-    1-hour preference cache with auto-refresh
-    Granular control over which channels users want to receive
-
-Delivery Tracking
-
-    Complete audit trail of all notification attempts
-    30-day delivery status retention
-    Per-channel success/failure tracking
-
-Smart Channel Selection
-
-    Automatic channel selection based on notification type
-    Priority-based routing (URGENT → All channels, NORMAL → IN_APP only)
-    Fallback mechanisms for channel failures
-
-› Channel Implementations
-
-In-App Notifications
-
-    WebSocket real-time delivery
-    Persistent storage in database
-    Badge counts and read/unread tracking
-
-Email Notifications
-
-    Template-based email rendering with EJS
-    Queue-based processing with Bull
-    Configurable SMTP and SendGrid support
-    Automatic retry on failure
-
-SMS Notifications
-
-    Twilio integration
-    E.164 phone number validation
-    Template system for consistent messaging
-
-Push Notifications
-
-    Web Push (VAPID) - Browser push notifications without Firebase
-    Works with Chrome, Firefox, Edge, Safari
-    No third-party service required for web browsers
-    Automatic VAPID key generation script (pnpm vapid:generate)
-    Service worker for background notification handling
-    Firebase Cloud Messaging (FCM) - For mobile apps
-    Required for iOS and Android native apps
-    Device token management
-    Smart Provider Selection
-    Automatically uses VAPID for web subscriptions
-    Automatically uses FCM for mobile tokens
-    Supports both simultaneously
-    Rich notification payloads with badges and actions
-
-› Advanced Capabilities
-
-Batch Operations
-
-    sendBatch(): Send to multiple users efficiently
-    sendToPermission(): Target users by permission level
-    Optimized database queries and caching
-
-Template Engine
-
-    EJS-based templating for emails
-    Variable substitution for personalization
-    Channel-specific template support
-
-Redis Caching
-
-    User preference caching (1-hour TTL)
-    Idempotency tracking (30-day TTL)
-    Delivery status caching (30-day TTL)
-    Cache hit rate monitoring
-
-Email Queue Management
-
-    Bull queue for email processing
-    Configurable retry strategies
-    Dead letter queue for failed jobs
-    Queue statistics and monitoring
-
-› Premium Admin Dashboard
-
-Overview Tab
-
-    Real-time statistics with glassmorphism StatsCards
-    Total Sent, Failed, Queue Jobs, Success Rate
-    Channel status monitoring (IN_APP, EMAIL, SMS, PUSH)
-    Performance metrics with visual progress bars
-    Queue health indicators
-    System uptime tracking
-    Redis connection status
-
-Health Monitor Tab
-
-    Overall system health status with color-coded indicators
-    Individual channel health checks
-    Redis cache connection monitoring
-    Real-time health updates with manual refresh
-    Detailed error reporting per channel
-
-Channel Testing Tab
-
-    Interactive test tools for all 4 channels
-    User ID configuration with optional overrides
-    Email address override for testing
-    Phone number override for SMS (E.164 format)
-    Real-time test results with success/failure indicators
-    Delivery status tracking per test
-    Testing tips and best practices
-
-Queue Manager Tab
-
-    Real-time queue statistics (Waiting, Active, Completed, Failed, Total)
-    Queue health monitoring with status badges
-    Failure rate calculation and alerts
-    Queue cleanup tools with configurable age
-    Safety confirmation dialogs for destructive actions
-    Health indicators (degraded when >10% failure rate)
-
-Metrics Panel Tab
-
-    Time-based analytics (Hour, Day, Week, Month)
-    Total notification overview metrics
-    Channel-specific performance breakdown
-    Notification type distribution
-    Success rate visualization per channel
-    Trend analysis and comparisons
-
-Settings Panel Tab
-
-    Channel configuration display
-    Provider status overview (SendGrid, Nodemailer, Twilio, FCM)
-    Feature status indicators:
-    Idempotency (enabled, 30-day TTL)
-    User Preferences (enabled, 1-hour cache)
-    Delivery Tracking (enabled, 30-day TTL)
-    Priority levels overview
-    All 15+ notification types listed
-    Provider configuration status
-
-› Complete Migration
-
-100% Platform Coverage
-
-    Migrated all 66+ backend files using notifications
-    Eliminated legacy utils/notifications.ts wrapper
-    No backward compatibility layers needed
-    Clean, consistent API across entire platform
-
-Affected Systems
-
-    P2P Trading notifications (10+ notification types)
-    Copy Trading notifications (follower/leader events)
-    NFT marketplace notifications (listings, bids, auctions)
-    Ecosystem wallet notifications (deposits, withdrawals, transfers)
-    ICO notifications (contributions, vesting, refunds)
-    Staking notifications (deposits, claims, rewards)
-    Forex trading notifications (deposits, withdrawals, trades)
-    Futures trading notifications (positions, liquidations)
-    Binary trading notifications (orders, outcomes)
-    E-commerce notifications (orders, shipping)
-    Gateway notifications (payments, refunds)
-    Investment notifications (AI trading, market maker)
-
-› Technical Architecture
-
-Service Layer
-
-    NotificationService singleton for all operations
-    Channel registry for extensibility
-    Provider abstraction layer
-    Error handling with dedicated exception types
-
-Data Models
-
-    notification table for in-app messages
-    notification_user_preference for user settings
-    Redis for caching and idempotency
-    Bull queue for email processing
-
-Type Safety
-
-    TypeScript interfaces for all operations
-    Zod schemas for validation
-    Strict null checking throughout
-
-Performance Optimizations
-
-    Redis caching reduces database queries
-    Batch operations minimize network overhead
-    Queue-based email processing prevents blocking
-    Connection pooling for external services
-
-Database-Backed Settings System
-
-All platform configuration has been migrated from environment variables to the database, allowing real-time configuration changes through the admin panel:
-› Settings Now in Admin Panel
-
-Security Settings (/admin/settings):
-
-    Authentication:
-    Google OAuth Login - Enable/disable social login
-    Email Verification - Require email verification after registration
-    Two-Factor Authentication:
-    Master 2FA toggle
-    SMS-based authentication
-    Email-based authentication
-    Authenticator app (TOTP)
-    Protection:
-    Google reCAPTCHA - Bot protection for forms
-
-Integration Settings (/admin/settings):
-
-    Google Analytics - Website analytics tracking
-    Facebook Pixel - Advertising and conversion tracking
-
-Module-Specific Settings:
-
-    Blog Settings (/admin/blog/settings):
-    Blog status toggle
-    Post layout selection (Default/Modern/Classic)
-    Trading Settings (/admin/trading/settings):
-    Spot trading enable/disable
-    Binary Trading Settings (/admin/finance/binary/settings):
-    Master toggle to enable/disable binary trading
-    Practice/demo mode toggle
-    Order types configuration (Rise/Fall, Higher/Lower, Touch/No Touch, Call/Put, Turbo)
-    Duration settings
-    Payout percentages
-    Barrier and strike levels
-    Risk management rules
-    Cancellation policies
-
-› Key Benefits
-
-    Instant Changes: All settings take effect immediately without server restart
-    Admin-Friendly: Configure through web interface instead of editing files
-    Centralized: All platform settings managed in one place
-    Secure: No need to access server files for configuration
-    Environment Independent: Same settings work across all environments
-
-› Maintenance Mode Improvements
-
-    Automatic maintenance page when server stops
-    No configuration needed
-    Removed maintenance checks from application code
-    Cleaner, more maintainable codebase
-
-› Migration Details
-
-Removed Environment Variables:
-
-    NEXT_PUBLIC_GOOGLE_AUTH_STATUS
-    NEXT_PUBLIC_VERIFY_EMAIL_STATUS
-    NEXT_PUBLIC_2FA_STATUS and related 2FA method toggles
-    NEXT_PUBLIC_GOOGLE_RECAPTCHA_STATUS
-    NEXT_PUBLIC_GOOGLE_ANALYTICS_STATUS
-    NEXT_PUBLIC_FACEBOOK_PIXEL_STATUS
-    NEXT_PUBLIC_BLOG_STATUS
-    NEXT_PUBLIC_BINARY_STATUS and NEXT_PUBLIC_BINARY_PRACTICE_STATUS
-    NEXT_PUBLIC_MAINTENANCE_STATUS
-
-Retained in .env (API keys and credentials):
-
-    NEXT_PUBLIC_GOOGLE_CLIENT_ID
-    NEXT_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY
-    NEXT_PUBLIC_GOOGLE_ANALYTICS_ID
-    NEXT_PUBLIC_FACEBOOK_PIXEL_ID
-
-› Notification System Configuration
-
-Email Provider Configuration (Choose one)
-
-Option 1: SMTP (Nodemailer)
-
-    APP_EMAILER="nodemailer-smtp"
-    APP_NODEMAILER_SMTP_HOST - Your SMTP server hostname
-    APP_NODEMAILER_SMTP_PORT - SMTP port (587 for TLS, 465 for SSL)
-    APP_NODEMAILER_SMTP_ENCRYPTION - "tls" or "ssl"
-    APP_NODEMAILER_SMTP_SENDER - Your sender email address
-    APP_NODEMAILER_SMTP_PASSWORD - SMTP authentication password
-    NEXT_PUBLIC_APP_EMAIL - Public-facing email address
-    APP_EMAIL_SENDER_NAME - Display name for emails
-
-Option 2: Gmail/Outlook (Nodemailer Service)
-
-    APP_EMAILER="nodemailer-service"
-    APP_NODEMAILER_SERVICE - "gmail" or "outlook"
-    APP_NODEMAILER_SERVICE_SENDER - Your Gmail/Outlook email
-    APP_NODEMAILER_SERVICE_PASSWORD - App-specific password (not your account password)
-    NEXT_PUBLIC_APP_EMAIL - Public-facing email address
-    APP_EMAIL_SENDER_NAME - Display name for emails
-
-Option 3: SendGrid
-
-    APP_EMAILER="nodemailer-sendgrid"
-    APP_SENDGRID_API_KEY - Your SendGrid API key
-    APP_SENDGRID_SENDER - Verified sender email in SendGrid
-    NEXT_PUBLIC_APP_EMAIL - Public-facing email address
-    APP_EMAIL_SENDER_NAME - Display name for emails
-
-SMS Provider Configuration
-
-    APP_TWILIO_ACCOUNT_SID - Twilio Account SID
-    APP_TWILIO_AUTH_TOKEN - Twilio Auth Token
-    APP_TWILIO_PHONE_NUMBER - Your Twilio phone number (E.164 format: +1234567890)
-    APP_SUPPORT_PHONE_NUMBER - Support phone number for SMS messages
-
-Push Notification Configuration
-
-Two options are available for push notifications. You can use either one or both:
-
-Option 1: Web Push (VAPID) - Recommended for Browsers
-
-Works with Chrome, Firefox, Edge, and Safari without requiring Firebase.
-bash
-
-# Generate VAPID keys automatically
-pnpm vapid:generate
-
-This script will prompt for your email and automatically update your .env file with:
-
-    VAPID_PUBLIC_KEY - Generated public key for browser subscriptions
-    VAPID_PRIVATE_KEY - Generated private key (keep secret!)
-    VAPID_SUBJECT - Your email (mailto:admin@example.com) or website URL
-
-Option 2: Firebase Cloud Messaging (FCM) - For Mobile Apps
-
-Required for native iOS and Android apps:
-
-    FCM_PROJECT_ID - Your Firebase project ID
-    FCM_PRIVATE_KEY - Firebase service account private key
-    FCM_CLIENT_EMAIL - Firebase service account email
-    FCM_SERVICE_ACCOUNT_PATH - Alternative: path to service account JSON file
-
-Important Notes
-
-    All email providers are now centrally managed through the notification service
-    The system automatically detects and uses the configured provider
-    No code changes needed to switch between providers
-    Provider status is displayed in the admin notification settings panel
-    Test each channel through the admin panel after configuration
-    Web Push (VAPID) is recommended for browser notifications - no Firebase account needed
-    FCM is only required if you have native iOS/Android mobile apps
-    Both VAPID and FCM can be configured simultaneously - the system will use the appropriate one based on subscription type
-
-Bug Fixes
-KYC Document Type Toggle Not Saving
-
-    Fixed Document Type Toggle Persistence: Resolved an issue in the KYC Level Builder where toggling identity document types (Passport, Driver's License, National ID, Residence Permit, Other Government-Issued ID) on or off would not persist after saving
-
-Binary Trading Transaction Type Error
-
-    Fixed Transaction Type Validation: Resolved an error where binary trading order completions (WIN/LOSS) would fail with "Type must be one of the valid transaction types"
-    Operation types are now properly mapped to valid database transaction types while preserving the original operation type in metadata for auditing
-
-Menu Visibility Based on Settings
-
-    Fixed Binary Menu Visibility: Binary trading menu items now properly hide from user navigation when binary trading is disabled in settings
-    Admin Menu Always Visible: Admin panel menu items for binary and blog now remain visible regardless of feature status, allowing administrators to manage settings even when features are disabled
-    Proper Settings Integration: Binary status is now managed through main settings system with proper naming (binaryStatus, binaryPracticeStatus) for easy identification
-    Settings Type Handling: Fixed menu filtering to handle both string "true" and boolean true values since the settings store converts strings to booleans for convenience
-    Settings Array Conversion: Fixed critical menu visibility issue by properly converting settings array from API to object format using settingsToObject() helper
-
-Binary Settings UI Improvements
-
-    Master Controls at Top: Moved binary master toggles (Binary Trading Status and Practice Mode Status) to the top of the settings page as the most important settings
-    Full Responsiveness: Updated all grid layouts in binary settings page for proper mobile and tablet responsiveness
-    Clean Architecture: Implemented three-key architecture with binaryStatus, binaryPracticeStatus, and binarySettings as completely separate, independent database keys with no legacy compatibility layer
-    Enhanced UI: Created prominent Master Controls section with glassmorphism card design and gradient styling
-    Separate State Management: Added independent state variables for master toggles and advanced settings for cleaner code organization
-
-2FA Settings Display
-
-    Fixed Conditional Display: Resolved issue where SMS 2FA, Email 2FA, and Authenticator App 2FA settings weren't showing when master 2FA toggle was enabled
-    Type-Safe Comparisons: Updated all showIf functions to handle both string "true" and boolean true values throughout the settings configuration
-    Consistent Behavior: All conditional fields now properly display based on parent settings regardless of value type
-
-Blog Settings Organization
-
-    New General Tab: Created new "General" tab as the first tab in blog settings for primary configuration
-    Reorganized Settings: Moved Blog Status toggle and Blog Post Layout from Display tab to General tab for better UX
-    Improved Navigation: General settings now appear first, making the most important blog configuration immediately accessible
-
-ESLint Configuration and Code Quality
-
-    Migrated to ESLint Flat Config: Updated from deprecated .eslintignore file to modern ignores property in eslint.config.mjs
-    Fixed All Case Declaration Errors: Resolved 32 no-case-declarations errors by wrapping lexical declarations in case blocks with braces across multiple files:
-    position-sizing-calculator.tsx - Fixed 5 cases
-    use-risk-management.ts - Fixed 5 cases
-    orderbook.worker.ts - Fixed 2 cases
-    chart-canvas.tsx - Fixed 2 cases
-    image-resizer.tsx - Fixed 4 cases
-    Fixed Critical Hook Violations: Resolved conditional hook call in element renderer by moving validation inside useMemo and wrapping helper functions in useCallback
-    Configured React Hooks Plugin: Added and configured eslint-plugin-react-hooks with appropriate rules for the codebase patterns
-    Optimized Hook Rules: Disabled exhaustive-deps and rules-of-hooks to prevent infinite loops and allow intentional render helper patterns
-    Added Comprehensive Ignores: Configured ESLint to ignore build artifacts, generated files, and third-party code (chart-engine, i18n webpack plugins)
-
-Premium User Profile Redesign
-
-Complete overhaul of the user profile page with a premium "Obsidian Lux" design aesthetic:
-› New Premium Components
-
-    Profile Hero: Animated header with security score ring, avatar upload, profile completion bar, and contextual action buttons
-    Premium Sidebar: Glassmorphism navigation with profile stats, security tips, and smooth tab transitions
-    Dashboard Tab: Account overview with stat cards, security checklist, recent activity feed, and quick actions
-    Security Tab: Security center with 2FA management, session controls, and security score visualization
-    Personal Info Tab: Enhanced form with cascading location selectors (Country → State → City)
-
-› Design Features
-
-    Dark zinc backgrounds with amber/gold accent gradients
-    Glassmorphism effects with subtle transparency
-    Framer Motion animations throughout
-    Responsive design for all screen sizes
-    Security score ring visualization around avatar
-
-› Location Selector Integration
-
-    Integrated CountrySelect, StateSelect, and CitySelect components from UI library
-    Cascading selection with automatic reset (changing country resets state and city)
-    Consistent dark theme styling across all selectors
-
-› Conditional UI Based on Settings
-
-    KYC-related UI elements now respect kycStatus setting:
-    KYC badge on profile hero hidden when KYC disabled
-    "Upgrade KYC" button hidden when KYC disabled
-    "KYC Level" stat card hidden when KYC disabled
-    "KYC Verification" checklist item hidden when KYC disabled
-    Removed share profile functionality (no public profile page exists)
-
-› Smart Action Buttons
-
-    Profile hero action buttons now show contextually based on current tab:
-    Settings button: Visible on Overview and Profile tabs (navigates to Security)
-    Edit Profile button: Visible on Overview and Security tabs (navigates to Profile)
-    Prevents redundant navigation buttons when already on the target tab
-
+This will bundle your updated .env configuration into the production build.
 Improvements
-Backend Security Validation
+Binary Market Management
 
-    Binary Order Creation: Added validation to check binaryStatus and binaryPracticeStatus settings before allowing order placement to prevent money-spending when features are disabled
-    Investment Creation: Added validation to check investment setting before creating investments to prevent unauthorized investment creation
-    Spot Trading Orders: Added validation to check spotStatus setting before creating orders to prevent trading when feature is disabled
-    Read-Only Endpoints Protected: Market listing and other read-only endpoints remain unrestricted for better user experience while money-spending operations are properly gated
+A redesigned experience for creating and editing binary markets:
+› New Market Creation Wizard
 
-Payment Gateway Handlers
+    Step-by-Step Process: Clear 3-step wizard for adding new binary markets
+    Market Source Selection: Choose between exchange markets or ecosystem markets with visual guidance
+    Smart Filtering: Only shows markets not already added as binary markets
+    Search Functionality: Quick search to find specific trading pairs
+    Visual Feedback: Modern card-based selection with clear progress indicators
 
-    All fiat deposit verification handlers now use the centralized wallet service
-    Consistent error handling across all payment gateways
-    Improved transaction logging with operation metadata
+› Market Configuration Options
 
-Gateway Operations
+    Active Status: Enable or disable trading on the market
+    Trending Badge: Mark markets as currently trending
+    Hot Badge: Feature markets as popular/hot
 
-    Refund processing uses atomic wallet operations
-    Fee collection properly tracked through wallet service
-    Payout processing with proper audit trail
+› Edit Page Improvements
 
-Trading Operations
+    Unsaved Changes Detection: Visual indicator when changes haven't been saved
+    Reset Functionality: Quickly revert to original values
+    Loading States: Proper loading indicators during operations
 
-    Exchange order wallet operations centralized
-    Binary order payouts use safe arithmetic
-    Copy trading allocations properly tracked
+reCAPTCHA Integration
 
-P2P Trading
+    Improved Script Loading: reCAPTCHA now loads reliably in production environments
+    Hidden Badge: reCAPTCHA badge is hidden globally for cleaner UI (compliant with Google's terms)
+    Better Error Handling: More graceful handling when reCAPTCHA fails to load
 
-    Trade release and cancellation use atomic operations
-    Offer creation with proper fund locking
-    Dispute resolution through centralized service
+Documentation Updates
 
-Admin Settings Enhancements
+    reCAPTCHA v3 Setup Guide: Updated documentation with correct instructions for setting up reCAPTCHA v3 (not v2)
+    Domain Configuration: Clear guidance on adding domains in Google reCAPTCHA Admin Console
 
-    Clear Settings Cache Button: Added a cache refresh button to the System Settings page header for quick cache invalidation when settings don't reflect correctly
-    Cache API Endpoints: New POST /api/admin/system/settings/cache endpoint for programmatic cache management
-    VAPID Provider Detection: Notification settings panel now correctly shows VAPID (Web Push) vs FCM (Firebase) based on configured environment variables
-    Settings Cache Fix: Fixed a bug where updating settings could corrupt the in-memory cache, causing only partial settings to be returned
+Upgrade Support
 
-Notification Templates
+For assistance with migration or issues:
 
-    SMS Templates Added: All notification templates now include SMS message content (160 character limit)
-    Push Templates Added: All notification templates now include Push notification body content (240 character limit)
-    SMS & Push Enabled by Default: All 99 notification templates now have sms: true and push: true enabled by default
-    Template Seeder Update: Running pnpm seed:notification will now update existing templates with SMS/Push content and enable the flags
-    Template Manager UI: SMS and Push channel toggles are now fully functional in the admin notification template editor (/admin/system/notification/template)
-
-PWA Management & Push Notifications
-
-    Auto-Generated Manifest Files: PWA manifest files (manifest.json and site.webmanifest) are now auto-generated if missing when accessing PWA settings, using environment variables for default values
-    Multi-Device Push Support: Push notifications now properly send to ALL registered devices instead of just one, enabling users to receive notifications on desktop and mobile simultaneously
-    Automatic Subscription Sync: Browser push subscriptions are automatically synced with the server when visiting the notifications settings page, ensuring devices are always registered
-    Device ID Generation: Consistent device IDs are generated based on push endpoint hash, ensuring the same device always uses the same identifier across sessions
-    Fixed Notification Icons: Push notification icons now display correctly using proper paths (/img/logo/android-chrome-192x192.png)
-    Service Initialization Optimization: Removed duplicate provider initialization that was causing redundant startup logs - TwilioProvider and WebPushProvider are now initialized only once
-    Consolidated Startup Logs: Notification service startup now shows a single clean log line: [NotificationService] Channels: IN_APP, EMAIL, SMS, PUSH (WebPush) instead of multiple verbose entries
-    Channel Singleton Pattern: API endpoints now reuse registered notification channels instead of creating new instances, improving performance and eliminating duplicate initialization
-
-Ecosystem Operations
-
-    ECO wallet creation streamlined
-    Blockchain deposit processing improved
-    Transfer operations between wallet types unified
-
-Data Table Filter Responsiveness
-
-    Improved Grid Breakpoints: Filter grid now uses more appropriate breakpoints to prevent overlap:
-    Single column on mobile (default)
-    2 columns at md (768px+)
-    3 columns at xl (1280px+)
-    4 columns at 2xl (1536px+)
-    Text Filter Stacking: Operator select and input now stack vertically on smaller screens, switching to horizontal layout at lg (1024px+)
-    Range Filter Stacking: Operator select and value inputs now stack vertically until lg breakpoint, with "between" mode inputs stacking until sm breakpoint
-    Reduced Padding on Mobile: Filter container now uses smaller gap and padding on mobile (gap-3 p-3) with larger values on sm+
-    Prevented Overflow: Added min-w-0 to flex items to prevent content overflow in constrained grid cells
-
-Technical Notes
-Backward Compatibility
-
-    All existing APIs continue to work without changes
-    Internal implementations updated to use centralized service
-    No database schema changes required
-
-Audit Logging
-
-    Console-based audit logging for all wallet operations
-    Transaction table serves as the source of truth
-    Original operation types preserved in transaction metadata
+    Visit our Support Center
+    Review the Documentation
+    Check Server Requirements
