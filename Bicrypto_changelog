@@ -1,74 +1,23 @@
-Core v6.0.6
+Core v6.1.2
+Release Date: January 8, 2026 Tags: LICENSE ACTIVATION, TYPE IMPROVEMENTS, VALIDATION, BUG FIXES
 
-Release Date: January 5, 2026 Tags: IMPROVEMENTS, BINARY TRADING, SECURITY
 Overview
+Version 6.1.2 is a minor patch focusing on license activation improvements and type safety enhancements for validation.
 
-Version 6.0.6 introduces an improved Binary Market management experience with a redesigned creation wizard, and fixes reCAPTCHA integration for more reliable authentication.
-Upgrade Notes
-Step 1: Configure reCAPTCHA v3
+Update Instructions
+After updating, restart your application:
 
-Important: Before running the updator, you must ensure reCAPTCHA is configured correctly in your .env file. reCAPTCHA v2 is no longer supported - you must use v3.
-
-    1Follow the complete setup guide: Authentication Setup
-    2When creating your reCAPTCHA keys in Google Admin Console:
-
-    Select reCAPTCHA v3 (NOT v2 - v2 will not work)
-    Add your domains (e.g., yourdomain.com, www.yourdomain.com)
-    Copy both Site Key and Secret Key
-
-    1Update your .env file with the v3 keys:
-
-env
-
-   NEXT_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY="your-v3-site-key"
-   NEXT_PUBLIC_GOOGLE_RECAPTCHA_SECRET_KEY="your-v3-secret-key"
-
-::alert{type="warning"} If you previously had reCAPTCHA v2 keys configured, you must generate new v3 keys. v2 keys will not work with this update. ::
-Step 2: Run Updator
 bash
 
-pnpm updator
+[CODE]pnpm restart
 
-This will bundle your updated .env configuration into the production build.
+[/CODE]
+
+Bug Fixes
+License Activation
+Activation Flow: Fixed minor issues in the license activation process
+Error Handling: Improved error handling during license verification
 Improvements
-Binary Market Management
-
-A redesigned experience for creating and editing binary markets:
-› New Market Creation Wizard
-
-    Step-by-Step Process: Clear 3-step wizard for adding new binary markets
-    Market Source Selection: Choose between exchange markets or ecosystem markets with visual guidance
-    Smart Filtering: Only shows markets not already added as binary markets
-    Search Functionality: Quick search to find specific trading pairs
-    Visual Feedback: Modern card-based selection with clear progress indicators
-
-› Market Configuration Options
-
-    Active Status: Enable or disable trading on the market
-    Trending Badge: Mark markets as currently trending
-    Hot Badge: Feature markets as popular/hot
-
-› Edit Page Improvements
-
-    Unsaved Changes Detection: Visual indicator when changes haven't been saved
-    Reset Functionality: Quickly revert to original values
-    Loading States: Proper loading indicators during operations
-
-reCAPTCHA Integration
-
-    Improved Script Loading: reCAPTCHA now loads reliably in production environments
-    Hidden Badge: reCAPTCHA badge is hidden globally for cleaner UI (compliant with Google's terms)
-    Better Error Handling: More graceful handling when reCAPTCHA fails to load
-
-Documentation Updates
-
-    reCAPTCHA v3 Setup Guide: Updated documentation with correct instructions for setting up reCAPTCHA v3 (not v2)
-    Domain Configuration: Clear guidance on adding domains in Google reCAPTCHA Admin Console
-
-Upgrade Support
-
-For assistance with migration or issues:
-
-    Visit our Support Center
-    Review the Documentation
-    Check Server Requirements
+Type Safety
+Validation Types: Enhanced TypeScript types for validation schemas
+Type Definitions: Improved type definitions for better IDE support and compile-time checks
