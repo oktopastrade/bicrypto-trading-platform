@@ -1,0 +1,775 @@
+BicryptoV6.1.2/frontend/app/[locale]/(dashboard)/admin/system/license/page.tsx   #L73-L78)
+if you got stuck on the license is verified and you are not ebale to access admin dashboard 
+this where you got the problem try to change the file whith this one   the change is make true to redirect directly to admin page not license page 
+
+go to BicryptoV6.1.2/frontend/app/[locale]/(dashboard)/admin/system/license/page.tsx  and change the whole file  with : 
+
+
+"use client";
+
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { $fetch } from "@/lib/api";
+import {
+  Key,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  ExternalLink,
+  FileText,
+  ArrowLeft,
+  Shield,
+  Sparkles,
+  Lock,
+  Unlock,
+  Package,
+  Boxes,
+  Cpu,
+  Globe,
+  ShoppingCart,
+  Mail,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
+
+interface ProductInfo {
+  productId: string;
+  name: string;
+  title: string;
+  description?: string;
+  type: "core" | "extension" | "blockchain" | "exchange";
+  image?: string;
+  link?: string;
+}
+
+export default function LicenseActivationPage() {
+  const t = useTranslations("dashboard_admin");
+  const tCommon = useTranslations("common");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const productId = searchParams.get("productId");
+  const returnPath = searchParams.get("return");
+  const needsActivation = searchParams.get("needsActivation") === "true";
+  const isCore = !productId;
+
+  const [purchaseCode, setPurchaseCode] = useState("");
+  const [notificationEmail, setNotificationEmail] = useState("");
+  const [activating, setActivating] = useState(false);
+  const [activationError, setActivationError] = useState<string | null>(null);
+  const [activationSuccess, setActivationSuccess] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
+  const [productInfo, setProductInfo] = useState<ProductInfo | null>(null);
+  const [activeMethod, setActiveMethod] = useState<"code" | "file">("code");
+  const [licenseAlreadyActive, setLicenseAlreadyActive] = useState(false);
+
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        if (isCore) {
+          const response = await $fetch({
+            url: "/api/admin/system/license/status",
+            method: "GET",
+            silent: true,
+          });
+
+          // If license is valid, always redirect to admin dashboard
+          if (response.data?.isValid) {
+            // BYPASS: Always redirect immediately when license is valid
+            router.replace("/admin");
+            return;
+          }
+
+          setProductInfo({
+            productId: response.data?.productId || "core",
+            name: "bicrypto",
+            title: response.data?.productName || "BiCrypto",
+            description: "Complete cryptocurrency exchange platform with spot trading, wallets, and more.",
+            type: "core",
+            link: "https://codecanyon.net/item/bicrypto-crypto-trading-platform-exchange-wallets/35521838",
+          });
+        } else {
+          // Use unified products API to find the product
+          const productsResponse = await $fetch({
+            url: "/api/admin/system/extension",
+            method: "GET",
+            silent: true,
+          });
+
+          let foundProduct = false;
+
+          if (productsResponse.data) {
+            const { extensions, blockchains, exchangeProviders } = productsResponse.data;
+
+            // Check extensions
+            const extension = extensions?.find((ext: any) => ext.productId === productId);
+            if (extension) {
+              foundProduct = true;
+              setProductInfo({
+                productId: extension.productId,
+                name: extension.name,
+                title: extension.title || extension.name,
+                description: extension.description,
+                type: "extension",
+                image: extension.image,
+                link: extension.link,
+              });
+
+              // Auto-redirect if license is truly verified (API confirms it's valid)
+              if (extension.licenseVerified) {
+                const redirectTo = returnPath || getProductReturnPath(extension.name, "extension");
+                router.replace(redirectTo);
+                return;
+              }
+            }
+
+            // Check blockchains
+            if (!foundProduct) {
+              const blockchain = blockchains?.find((bc: any) => bc.productId === productId);
+              if (blockchain) {
+                foundProduct = true;
+                setProductInfo({
+                  productId: blockchain.productId,
+                  name: blockchain.chain || blockchain.name,
+                  title: blockchain.title || `${blockchain.chain} Blockchain`,
+                  description: blockchain.description,
+                  type: "blockchain",
+                  image: blockchain.image,
+                  link: blockchain.link,
+                });
+
+                // Auto-redirect if license is truly verified (API confirms it's valid)
+                if (blockchain.licenseVerified) {
+                  const redirectTo = returnPath || `/admin/ecosystem`;
+                  router.replace(redirectTo);
+                  return;
+                }
+              }
+            }
+
+            // Check exchange providers
+            if (!foundProduct) {
+              const exchange = exchangeProviders?.find((ex: any) => ex.productId === productId);
+              if (exchange) {
+                foundProduct = true;
+                setProductInfo({
+                  productId: exchange.productId,
+                  name: exchange.name,
+                  title: exchange.title || exchange.name,
+                  description: `${exchange.title} exchange provider integration`,
+                  type: "exchange",
+                  image: exchange.image,
+                  link: exchange.link,
+                });
+
+                // Auto-redirect if license is truly verified (API confirms it's valid)
+                // licenseVerified means the license was validated successfully, so redirect
+                if (exchange.licenseVerified) {
+                  const redirectTo = returnPath || `/admin/finance/exchange`;
+                  router.replace(redirectTo);
+                  return;
+                }
+              }
+            }
+          }
+
+          // Fallback if product not found anywhere
+          if (!foundProduct) {
+            setProductInfo({
+              productId: productId,
+              name: productId,
+              title: "Product",
+              type: "extension",
+            });
+          }
+        }
+      } catch (err) {
+        console.debug("License status check failed:", err);
+      } finally {
+        setCheckingStatus(false);
+      }
+    };
+
+    initialize();
+  }, [productId, isCore, router, returnPath]);
+
+  const getRedirectPath = () => {
+    if (returnPath) return returnPath;
+    if (isCore) return "/admin";
+    if (productInfo?.name && productInfo?.type) {
+      return getProductReturnPath(productInfo.name, productInfo.type);
+    }
+    return "/admin";
+  };
+
+  const handleActivate = async () => {
+    if (!purchaseCode.trim()) {
+      setActivationError("Please enter your purchase code");
+      return;
+    }
+
+    setActivating(true);
+    setActivationError(null);
+
+    try {
+      const body: any = { purchaseCode: purchaseCode.trim() };
+      if (!isCore && productId) {
+        body.productId = productId;
+      }
+      if (notificationEmail.trim()) {
+        body.notificationEmail = notificationEmail.trim();
+      }
+
+      const response = await $fetch({
+        url: "/api/admin/system/license/activate",
+        method: "POST",
+        body,
+        silent: true,
+      });
+
+      if (response.data?.success) {
+        setActivationSuccess(true);
+        setTimeout(() => {
+          window.location.href = getRedirectPath();
+        }, 2000);
+      } else {
+        const errorMsg = response.error || response.data?.message || "Activation failed";
+        setActivationError(errorMsg);
+      }
+    } catch (err: any) {
+      const errorMsg = err.data?.message || err.message || "Failed to activate license";
+      setActivationError(errorMsg);
+    } finally {
+      setActivating(false);
+    }
+  };
+
+  const handleActivateFromFile = async () => {
+    setActivating(true);
+    setActivationError(null);
+
+    try {
+      const body: any = {};
+      if (!isCore && productId) {
+        body.productId = productId;
+      }
+
+      const response = await $fetch({
+        url: "/api/admin/system/license/activate-from-file",
+        method: "POST",
+        body,
+        silent: true,
+      });
+
+      if (response.data?.success) {
+        setActivationSuccess(true);
+        setTimeout(() => {
+          window.location.href = getRedirectPath();
+        }, 2000);
+      } else {
+        setActivationError(
+          response.error || response.data?.message || "No license file found in /lic folder"
+        );
+      }
+    } catch (err: any) {
+      setActivationError(err.message || "Failed to activate from file");
+    } finally {
+      setActivating(false);
+    }
+  };
+
+  const handleBack = () => {
+    // Use return path if provided
+    if (returnPath) {
+      router.push(returnPath);
+    } else if (productInfo?.type === "core") {
+      // For core product, go to system update page
+      router.push("/admin/system/update");
+    } else if (productId) {
+      // If we have a productId, go back to the product showcase page
+      router.push(`/admin/system/extension/${productId}`);
+    } else {
+      // Default fallback to home
+      router.push("/");
+    }
+  };
+
+  const getProductIcon = () => {
+    switch (productInfo?.type) {
+      case "blockchain":
+        return <Cpu className="h-8 w-8" />;
+      case "extension":
+        return <Boxes className="h-8 w-8" />;
+      case "exchange":
+        return <Globe className="h-8 w-8" />;
+      default:
+        return <Package className="h-8 w-8" />;
+    }
+  };
+
+  const getProductTypeLabel = () => {
+    switch (productInfo?.type) {
+      case "blockchain":
+        return "Blockchain Integration";
+      case "extension":
+        return "Extension";
+      case "exchange":
+        return "Exchange Provider";
+      default:
+        return "Core Platform";
+    }
+  };
+
+  if (checkingStatus) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="text-center space-y-6">
+          <div className="relative">
+            <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto animate-pulse">
+              <Shield className="h-10 w-10 text-primary" />
+            </div>
+            <div className="absolute inset-0 h-20 w-20 rounded-full border-2 border-primary/20 border-t-primary animate-spin mx-auto" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">{t("verifying_license")}</h2>
+            <p className="text-muted-foreground">{t("please_wait_while_we_check_your")}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (activationSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-success/5">
+        <div className="text-center space-y-8 p-8">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full bg-success/10 flex items-center justify-center mx-auto">
+              <CheckCircle className="h-12 w-12 text-success" />
+            </div>
+            <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-success animate-pulse" />
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-3xl font-bold text-success">{t("license_activated")}</h2>
+            <p className="text-lg text-muted-foreground max-w-md mx-auto">
+              {t("your_license_for")}{" "}
+              <span className="font-semibold text-foreground">{productInfo?.title}</span>{" "}
+              {t("has_been_successfully_activated")}
+            </p>
+          </div>
+          <div className="flex items-center justify-center gap-2 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>{t("redirecting_you_now_ellipsis")}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (licenseAlreadyActive) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-success/5">
+        <div className="text-center space-y-8 p-8 max-w-lg">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full bg-success/10 flex items-center justify-center mx-auto">
+              <CheckCircle className="h-12 w-12 text-success" />
+            </div>
+            <Shield className="absolute -top-2 -right-2 h-8 w-8 text-success" />
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-3xl font-bold text-success">{t("license_already_active") || "License Already Active"}</h2>
+            <p className="text-lg text-muted-foreground max-w-md mx-auto">
+              {t("your_license_for")}{" "}
+              <span className="font-semibold text-foreground">{productInfo?.title}</span>{" "}
+              {t("is_already_activated") || "is already activated and valid."}
+            </p>
+          </div>
+          <div className="flex flex-col items-center gap-4">
+            <Button
+              onClick={() => {
+                const redirectTo = returnPath || "/admin";
+                window.location.href = redirectTo;
+              }}
+              size="lg"
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {t("go_to_admin") || "Go to Admin Panel"}
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              {t("license_valid_message") || "Your license has been verified and is active."}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Header */}
+      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBack}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Lock className="h-4 w-4" />
+              {t("secure_license_activation")}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container max-w-7xl mx-auto px-4 py-8 lg:py-12">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          {/* Left Side - Product Info */}
+          <div className="space-y-8">
+            {/* Product Header */}
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-sm font-medium">
+                <Key className="h-4 w-4" />
+                {t("license_required")}
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  {productInfo?.image ? (
+                    <img
+                      src={productInfo.image}
+                      alt={productInfo.title}
+                      className="h-16 w-16 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary">
+                      {getProductIcon()}
+                    </div>
+                  )}
+                  <div>
+                    <h1 className="text-3xl lg:text-4xl font-bold tracking-tight">
+                      {productInfo?.title || "Product"}
+                    </h1>
+                    <p className="text-muted-foreground mt-1">{getProductTypeLabel()}</p>
+                  </div>
+                </div>
+
+                <p className="text-lg text-muted-foreground max-w-lg">
+                  {productInfo?.description ||
+                    (isCore
+                      ? "Activate your license to unlock all features and access the admin panel."
+                      : "This feature requires a separate license. Please activate to continue.")}
+                </p>
+              </div>
+            </div>
+
+            {/* Purchase Link Card */}
+            {productInfo?.link && (
+              <Card className="bg-linear-to-r from-primary/5 via-primary/10 to-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <ShoppingCart className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{t("dont_have_a_license")}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t("purchase_this_product_on_envato_market")}
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={productInfo.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border border-border bg-background hover:bg-accent hover:text-accent-foreground transition-colors shrink-0"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      {tCommon("buy_now")}
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Product ID Card */}
+            {productId && (
+              <Card className="bg-muted/30 border-dashed">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider">{t("product_id")}</p>
+                      <code className="text-sm font-mono font-medium">{productId}</code>
+                    </div>
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Features Preview */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                {t("what_you_get_with_activation")}
+              </h3>
+              <div className="grid gap-3">
+                {[
+                  { icon: Unlock, text: "Full access to all features" },
+                  { icon: Shield, text: "Regular updates & security patches" },
+                  { icon: Sparkles, text: "Premium support access" },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50"
+                  >
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <item.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Activation Form */}
+          <div className="lg:sticky lg:top-24">
+            <Card className="overflow-hidden shadow-xl border-2">
+              <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 border-b">
+                <h2 className="text-xl font-semibold">{t("activate_your_license")}</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t("choose_your_preferred_activation_method")}
+                </p>
+              </div>
+
+              <CardContent className="p-6 space-y-6">
+                {activationError && (
+                  <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-start gap-3">
+                    <XCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="font-medium">{t("activation_failed")}</p>
+                      <p className="text-destructive/80">{activationError}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Method Tabs */}
+                <div className="flex gap-2 p-1 bg-muted/50 rounded-lg">
+                  <button
+                    onClick={() => setActiveMethod("code")}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium transition-all",
+                      activeMethod === "code"
+                        ? "bg-background shadow-sm text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Key className="h-4 w-4" />
+                    {t("purchase_code")}
+                  </button>
+                  <button
+                    onClick={() => setActiveMethod("file")}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium transition-all",
+                      activeMethod === "file"
+                        ? "bg-background shadow-sm text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <FileText className="h-4 w-4" />
+                    {t("license_file")}
+                  </button>
+                </div>
+
+                {/* Purchase Code Method */}
+                {activeMethod === "code" && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">{t("purchase_code")}</label>
+                      <Input
+                        type="text"
+                        value={purchaseCode}
+                        onChange={(e) => setPurchaseCode(e.target.value)}
+                        placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                        disabled={activating}
+                        className="h-12 font-mono text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <ExternalLink className="h-3 w-3" />
+                        {t("find_your_code_in")}{" "}
+                        <a
+                          href="https://codecanyon.net/downloads"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          {t("envato_downloads")}
+                        </a>
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        {t("notification_email")}
+                        <span className="text-xs text-muted-foreground font-normal">({tCommon("optional")})</span>
+                      </label>
+                      <Input
+                        type="email"
+                        value={notificationEmail}
+                        onChange={(e) => setNotificationEmail(e.target.value)}
+                        placeholder="your@email.com"
+                        disabled={activating}
+                        className="h-12 text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {t("receive_update_notifications")}
+                      </p>
+                    </div>
+
+                    <Button
+                      onClick={handleActivate}
+                      disabled={activating || !purchaseCode.trim()}
+                      className="w-full h-12 text-base font-semibold"
+                      size="lg"
+                    >
+                      {activating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                          {tCommon('enable')}
+                        </>
+                      ) : (
+                        <>
+                          <Unlock className="h-5 w-5 mr-2" />
+                          {tCommon("activate_license")}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                {/* License File Method */}
+                {activeMethod === "file" && (
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-lg bg-muted/50 border border-dashed space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="space-y-1 text-sm">
+                          <p className="font-medium">{t("upload_instructions")}</p>
+                          <p className="text-muted-foreground">
+                            {t("download_your_license_certificate_from_envato")}{" "}
+                            <code className="px-1.5 py-0.5 bg-background rounded text-xs font-mono">
+                              license.txt
+                            </code>{" "}
+                            {t("file_in_the")}{" "}
+                            <code className="px-1.5 py-0.5 bg-background rounded text-xs font-mono">
+                              /lic
+                            </code>{" "}
+                            {t("folder")}
+                          </p>
+                        </div>
+                      </div>
+                      {productId && (
+                        <div className="pt-3 border-t border-border/50">
+                          <p className="text-xs text-muted-foreground">
+                            {t("expected_product_id")}{" "}
+                            <code className="px-1.5 py-0.5 bg-background rounded font-mono font-medium">
+                              {productId}
+                            </code>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <Button
+                      onClick={handleActivateFromFile}
+                      disabled={activating}
+                      className="w-full h-12 text-base font-semibold"
+                      size="lg"
+                    >
+                      {activating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                          {t("scanning_ellipsis")}
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="h-5 w-5 mr-2" />
+                          {t("activate_from_file")}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Help Link */}
+                <div className="pt-4 border-t text-center">
+                  <a
+                    href="https://help.market.envato.com/hc/en-us/articles/202822600-Where-Is-My-Purchase-Code"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    {t("how_to_find_your_purchase_code")}
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getProductReturnPath(productName: string, productType: string): string {
+  if (productType === "blockchain") {
+    return "/admin/ecosystem";
+  }
+
+  if (productType === "exchange") {
+    return "/admin/finance/exchange";
+  }
+
+  // Extension paths
+  const pathMap: Record<string, string> = {
+    ecosystem: "/admin/ecosystem",
+    staking: "/admin/staking",
+    p2p: "/admin/p2p",
+    ico: "/admin/ico",
+    forex: "/admin/forex",
+    futures: "/admin/futures",
+    copy_trading: "/admin/copy-trading",
+    affiliate: "/admin/affiliate",
+    ecommerce: "/admin/ecommerce",
+    nft: "/admin/nft",
+    ai_investment: "/admin/ai/investment",
+    ai_market_maker: "/admin/ai/market-maker",
+    bot: "/admin/ai/market-maker",
+    mailwizard: "/admin/mailwizard",
+    faq: "/admin/faq",
+    knowledge_base: "/admin/faq",
+    gateway: "/admin/gateway",
+    mlm: "/admin/mlm",
+    wallet_connect: "/admin/system/extension", // No admin page - redirect to extensions list
+    binary_pro: "/admin/binary",
+  };
+
+  return pathMap[productName] || "/admin/system/extension";
+}
+
+
