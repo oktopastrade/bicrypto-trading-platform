@@ -1,5 +1,5 @@
 BicryptoV6.1.2/frontend/app/[locale]/(dashboard)/admin/system/license/page.tsx   #L73-L78)
-if you got stuck on the license is verified and you are not ebale to access admin dashboard 
+if you got stuck on the license is verified and you can not  access admin dashboard 
 this where you got the problem try to change the file whith this one   the change is make true to redirect directly to admin page not license page 
 
 go to BicryptoV6.1.2/frontend/app/[locale]/(dashboard)/admin/system/license/page.tsx  and change the whole file  with : 
