@@ -25,4 +25,4 @@ we also added garnet support as well as redis for huge performance gain and post
 we also made db cleaner that automatically remove all bad FKs and indexes and duplications to keep db clean and performant
 //
 
-my advise is to wait do not do any custom work or chain integration untill new version is released users who wants to pay on fiverr for custom works redesign chains integrations better to wait the code will no longer support nextjs it will be rust
+#my advise is to wait do not do any custom work or chain integration untill new version is released users who wants to pay on fiverr for custom works redesign chains integrations better to wait the code will no longer support nextjs it will be rust
