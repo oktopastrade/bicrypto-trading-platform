@@ -1,23 +1,34 @@
-Core v6.1.2
-Release Date: January 8, 2026 Tags: LICENSE ACTIVATION, TYPE IMPROVEMENTS, VALIDATION, BUG FIXES
+Core v6.1.6
+BUG FIXES
+Core v6.1.4
 
-Overview
-Version 6.1.2 is a minor patch focusing on license activation improvements and type safety enhancements for validation.
+Release Date: January 30, 2026 Tags: BUG FIXES
+Upgrade Notes
+Step 1: Remove Deprecated Files
 
-Update Instructions
-After updating, restart your application:
-
+Run this command from your project root directory to remove deprecated files:
 bash
 
-[CODE]pnpm restart
+rm -rf backend/types/models && \
+rm "frontend/app/[locale]/(dashboard)/admin/system/upgrade-helper/page.tsx" \
+  frontend/components/blocks/data-table/drawers/compound-field.tsx \
+  frontend/components/blocks/data-table/drawers/drawer-form.tsx \
+  frontend/components/blocks/data-table/drawers/edit-create-drawer.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/custom-fields.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/date.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/index.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/multi-select-form-control.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/number.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/rating.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/select.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/switch.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/text-area.tsx \
+  frontend/components/blocks/data-table/drawers/form-controls/text.tsx \
+  frontend/components/blocks/data-table/drawers/regular-field.tsx \
+  frontend/components/blocks/data-table/utils/drawer.ts \
+  frontend/public/swagger.json
 
-[/CODE]
+Step 2: Run Updator
+bash
 
-Bug Fixes
-License Activation
-Activation Flow: Fixed minor issues in the license activation process
-Error Handling: Improved error handling during license verification
-Improvements
-Type Safety
-Validation Types: Enhanced TypeScript types for validation schemas
-Type Definitions: Improved type definitions for better IDE support and compile-time checks
+pnpm updator
