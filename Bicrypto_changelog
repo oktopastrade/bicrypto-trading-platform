@@ -1,34 +1,58 @@
-Core v6.1.6
-BUG FIXES
-Core v6.1.4
+Core v6.3.0
 
-Release Date: January 30, 2026 Tags: BUG FIXES
-Upgrade Notes
-Step 1: Remove Deprecated Files
+Release Date: March 12, 2026 Tags: PAYMENT GATEWAYS, BUG FIXES
+Overview
 
-Run this command from your project root directory to remove deprecated files:
-bash
+Version 6.3.0 focuses on fixing fiat deposit payment gateways. All 15 payment gateways have been reviewed and corrected to ensure deposits complete reliably from start to finish.
+Update Instructions
 
-rm -rf backend/types/models && \
-rm "frontend/app/[locale]/(dashboard)/admin/system/upgrade-helper/page.tsx" \
-  frontend/components/blocks/data-table/drawers/compound-field.tsx \
-  frontend/components/blocks/data-table/drawers/drawer-form.tsx \
-  frontend/components/blocks/data-table/drawers/edit-create-drawer.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/custom-fields.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/date.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/index.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/multi-select-form-control.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/number.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/rating.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/select.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/switch.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/text-area.tsx \
-  frontend/components/blocks/data-table/drawers/form-controls/text.tsx \
-  frontend/components/blocks/data-table/drawers/regular-field.tsx \
-  frontend/components/blocks/data-table/utils/drawer.ts \
-  frontend/public/swagger.json
-
-Step 2: Run Updator
+After updating, run the following command in terminal:
 bash
 
 pnpm updator
+
+Bug Fixes
+Stripe Deposits
+
+    Fixed an error that prevented Stripe checkout sessions from being created in local environments.
+    Fixed the Stripe payment popup closing immediately before anything could load.
+    Fixed payment confirmation failing after a successful Stripe payment.
+    Payments that were already processed now correctly show as successful instead of returning an error.
+
+PayPal Deposits
+
+    Fixed the PayPal button reloading endlessly, making it impossible to pay.
+    Fixed PayPal payment confirmation failing after the user approved the payment.
+    Fixed the PayPal button showing up before any amount was entered.
+
+All Payment Gateways
+
+    Payment buttons no longer appear until a valid deposit amount has been entered. Previously buttons were visible and clickable with no amount, which could cause failed payments.
+
+Mollie
+
+    Fixed payments getting stuck after redirect — the wrong reference was being sent during confirmation.
+
+2Checkout
+
+    Fixed payment confirmation failing after redirect due to a missing order number.
+
+Paystack
+
+    Fixed an incorrect field being used during payment confirmation, which could cause valid payments to fail.
+
+Paysafe
+
+    Fixed incorrect fields being sent during payment confirmation.
+
+dLocal
+
+    Fixed the wrong payment ID being sent during confirmation.
+
+eWay
+
+    Fixed payment confirmation sending the wrong access code and missing required reference fields.
+
+PayFast
+
+    Fixed payment confirmation looking up the wrong transaction record.
