@@ -1,9 +1,15 @@
-Core v6.3.0
-
-Release Date: March 12, 2026 Tags: PAYMENT GATEWAYS, BUG FIXES
+V6.3.9
 Overview
 
-Version 6.3.0 focuses on fixing fiat deposit payment gateways. All 15 payment gateways have been reviewed and corrected to ensure deposits complete reliably from start to finish.
+Version 6.3.9 is the page-builder release. A full audit of /admin/builder turned up ninety-plus findings ranging from silent data loss on every undo, to multiple stored-XSS vectors, to a template library where most of the "premium" catalog was empty stubs. This release closes all of them in one pass and rebuilds the template library from scratch.
+
+Headline changes:
+
+    Undo no longer wipes your page. Every structural undo used to silently empty the page. Fixed.
+    250 new premium templates across 25 categories — universal structure, universal content, and dedicated showcases for each active extension (trading, forex/futures, copy-trading, NFT, staking, ICO, P2P, e-commerce, affiliate, AI).
+    Edit mode now renders at preview parity. Gradients, buttons, alignment, column heights, inline layout — edit and preview now agree pixel-for-pixel on what the page looks like.
+    XSS hardening across every renderer that emitted HTML, plus a security pass on the admin page-content API.
+
 Update Instructions
 
 After updating, run the following command in terminal:
@@ -11,48 +17,143 @@ bash
 
 pnpm updator
 
-Bug Fixes
-Stripe Deposits
+No environment variables are required. No database migration is needed.
+Critical data-loss fix
+Undo no longer empties the page
 
-    Fixed an error that prevented Stripe checkout sessions from being created in local environments.
-    Fixed the Stripe payment popup closing immediately before anything could load.
-    Fixed payment confirmation failing after a successful Stripe payment.
-    Payments that were already processed now correctly show as successful instead of returning an error.
+The structural-action history path (row / column / section adds, moves, reorders, resizes — twelve actions in total) was encoding each inverse patch as "current page → empty page". The first undo on any of those actions quietly reset sections[] and elements[] to empty arrays. Users lost work on every Ctrl+Z that followed a structural change.
 
-PayPal Deposits
+All twelve structural actions now share the same patch logic the element actions use — createHistoryEntryFromChange(prev, next, label) — so an undo restores exactly the state before the change. The future[] stack is now cleared uniformly on every new action, the history is capped at 100 entries so long sessions don't grow unbounded, and deepClone no longer short-circuits into an alias (a prior bug where produce(obj, () => {}) was returning the same reference, silently making cloned state point at the live state).
 
-    Fixed the PayPal button reloading endlessly, making it impossible to pay.
-    Fixed PayPal payment confirmation failing after the user approved the payment.
-    Fixed the PayPal button showing up before any amount was entered.
+Ancillary store cleanups that rode along:
 
-All Payment Gateways
+    selectElement / selectRow / selectColumn now actually use their parent-context arguments (previously ignored, so ancestor selection was always null).
+    The 10 ms setTimeout race in addElement that deferred selection to the next tick is gone.
+    The dead historyIndex field that was written by half the actions and read by none has been removed from the type.
 
-    Payment buttons no longer appear until a valid deposit amount has been entered. Previously buttons were visible and clickable with no amount, which could cause failed payments.
+Stored-XSS hardening
+Every dangerouslySetInnerHTML call-site is now sanitized
 
-Mollie
+Eight render paths (Heading, Text, List, Quote, Link, Button, EditableContent, and the AI-generated section preview) were injecting admin-authored HTML into the public site without any sanitization. A new wrapper component running DOMPurify now mediates every one of them. The cursor-jump bug in contenteditable inline-edit (where the innerHTML was being rewritten on every parent tick) was fixed at the same time.
 
-    Fixed payments getting stuck after redirect — the wrong reference was being sent during confirmation.
+Related hardening:
 
-2Checkout
+    rel="noopener noreferrer" is now set on every external link and , and every window.open(url, "_blank") gets the "noopener,noreferrer" third argument to prevent tabnabbing.
+    htmlId / cssClasses editor fields were writing to one key name while the renderer was reading another — aligned. Classes now store as space-separated strings.
 
-    Fixed payment confirmation failing after redirect due to a missing order number.
+Admin page-content API
 
-Paystack
+    Public list and detail endpoints now filter status: "PUBLISHED" and no longer leak DRAFT content to anonymous visitors.
+    PUT /api/admin/content/page/:id returns the full record (previously returned { message }, which the frontend was then storing in its page-metadata state — silently corrupting local state on every save).
+    The public list response now excludes content, customCss, customJs, and settings (rows of content up to 16 MB each used to ship in the list payload).
+    Public caches are invalidated on every admin write (previously a 12 h stale window after any edit).
+    isHome uniqueness is enforced inside a transaction with lock: true — the prior race window between the demote-everyone-else and promote-this-one writes is closed.
+    visits and lastModifiedBy are now stripped from the writable schema; lastModifiedBy is always set server-side from the authenticated admin rather than a hardcoded literal.
+    Reserved slugs (admin, api, etc.) are rejected.
 
-    Fixed an incorrect field being used during payment confirmation, which could cause valid payments to fail.
+Template library rebuild — 250 premium templates
 
-Paysafe
+The old template directory was a mix of thirty rich files and nineteen stubs that rendered as empty sections. It has been deleted in its entirety. The new library:
+25 categories × 10 templates
 
-    Fixed incorrect fields being sent during payment confirmation.
+Universal structure (80): Header · Hero · Features · CTA · Pricing · Testimonials · Stats · Footer.
 
-dLocal
+Universal content (70): About · Team · Contact · FAQ · Logo Cloud · Newsletter · Blog.
 
-    Fixed the wrong payment ID being sent during confirmation.
+Extension showcases (100): Trading · Forex & Futures · Copy Trading · NFT · Staking · ICO Launchpad · P2P · E-commerce · Affiliate · AI Features. Each extension category contains ten premium sections specifically tailored to that extension — e.g. the NFT category has a collection-hero banner, trending-now scroll, mint-countdown hero, creator-spotlight, rarity showcase, activity feed preview, and so on; the ICO category has upcoming-sales grid, active-sale countdown, tokenomics breakdown, KYC process steps, etc.
+Shared design foundation
 
-eWay
+Every template is composed from a small set of typed factories:
 
-    Fixed payment confirmation sending the wrong access code and missing required reference fields.
+    el.heading / el.text / el.button / el.image / el.icon / el.divider / el.spacer / el.list / el.card / el.link / el.quote.
+    col(width, children, settings) and row(columns, settings) helpers.
+    section(rows, opts) factory with a stable slug id.
+    Premium theme tokens — theme.primary, theme.bgBase, theme.textMuted, etc. — in both light and dark variants so every section is theme-aware by default.
+    Gradient presets (indigoViolet, skyEmerald, amberRose, nightSky, aurora) with both light and dark stops.
+    Section padding presets (hero, standard, compact, bar) and row presets (contained, wide, narrow).
 
-PayFast
+freshenIds on every insert
 
-    Fixed payment confirmation looking up the wrong transaction record.
+Template ids are stable slugs for bookkeeping, but every nested row / column / element id is regenerated when a template is dropped into the canvas via the Add Section modal. Inserting the same template twice into one page no longer collides ids.
+Real previews in the selector
+
+The Add Section modal tiles now render real previews of each template via the existing SectionSnapshot + html-to-image pipeline instead of the prior solid-color placeholder. Tiles produce the actual pixels you'll get when you insert the section.
+Category selector
+
+    25 categories with proper metadata (label, description, Iconify icon, extension hint).
+    Per-category search filter now actually filters (the previous implementation declared searchTerm in its useMemo deps but never applied it to the result — so typing in the search box did nothing).
+
+Render parity — edit mode now matches preview
+
+A batch of rendering fixes closed the gap between what the canvas showed during editing and what the preview rendered.
+Gradients with hex stops now actually paint
+
+Templates using gradients with raw hex stops (from: "#6366f1", to: "#ec4899") were emitting invalid Tailwind classes like from-#6366f1 which Tailwind then purged — resulting in black backgrounds where a gradient was intended. A new gradientToCss() helper detects hex / rgb / hsl stops and emits inline CSS linear-gradient(...) instead. Tailwind color-name gradients (from-indigo-500) still use the class-based path for purge compatibility.
+Buttons now honor ColorValue objects
+
+ButtonSettings.backgroundColor and color were typed as plain strings but every template passed { light, dark } theme objects. JS coerced those to the literal string "[object Object]" and the browser ignored them — so every premium button rendered as an unstyled purple default. The button renderer now accepts strings, theme objects, and gradients; it resolves each to the current theme at render time. Size presets (sm / md / lg) were wired up so size: "lg" produces a 48 px button with real padding instead of the tiny default.
+Inline layout for links and icons
+
+Multiple elements stacked inside one column were rendering vertically in edit mode, producing the "nav links stacked one per line" bug visible in header templates. The canvas already had inline-grouping logic — consecutive elements with display: "inline-block" flow horizontally — but el.link and el.icon factories weren't setting it. They now default to display: "inline-block", so nav links render horizontally out of the box while footer link columns keep their explicit display: "block" override.
+Inline-group alignment synced between canvas and preview
+
+The canvas hardcoded justify-center for its inline-group wrapper while the section-renderer read textAlign from the first element — so the same template showed differently in edit vs preview. Both paths now share the same precedence:
+
+    1Column-level justifyContent (explicit override).
+    2Column-level textAlign (center / right / left / justify / around).
+    3First inline element's textAlign.
+    4Default flex-start.
+
+Supported mappings include justify/between → space-between and around → space-around so headers and footers can spread nav items properly when desired.
+Inline group wraps a lone button
+
+The canvas only wrapped two or more inline-capable elements in its flex container. A lone button fell through to block rendering and ignored textAlign: "right" on its column — so a single "Get started" CTA left-aligned in edit mode while the preview correctly right-aligned it via its own inline-group code. Both paths now wrap every inline element regardless of count.
+Edit-mode overlays no longer push content
+
+The orange / blue / green section / row / column selection and hover rings were implemented with regular CSS borders, which take layout space (1–2 px per side). They were replaced with outline: ... -outline-offset-2 so they sit inside the content box and don't shift siblings. Removed one extra wrapper
+and one inner
+layer that existed on the edit path but not in the renderer — these were introducing subtle height and flex differences.
+
+Section container width aligned
+
+The canvas section wrapper now applies getSectionContainerClass(section.type) (regular → max-w-6xl mx-auto px-4, specialty → max-w-7xl, fullwidth → w-full) matching the SectionRenderer used by preview exactly. This was the main reason edit and preview widths differed on non-fullwidth sections.
+Forced column min-height removed
+
+Every non-empty column in the canvas was getting min-h-[100px] applied unconditionally, forcing nav bars to render at 100 px even when their content only needed 60. Preview (which used natural content height) differed visibly. Non-empty columns now render at their content height; empty columns keep an 80 px minimum just so the "Add Content" affordance stays clickable.
+Button clicks select instead of being swallowed
+
+Clicking a button in edit mode did nothing — the button's click handler called e.stopPropagation() which blocked the click from reaching the outer Element wrapper that opens the settings panel. It now only preventDefaults (to block link navigation) and lets the event bubble so the wrapper's selectElement fires.
+Settings panel and UX polish
+Panel title spacing
+
+The right-sidebar header rendered ColumnSettings / RowSettings / SectionSettings with no space between the element type and the word "Settings". Fixed — now reads "Column Settings", "Row Settings", "Section Settings".
+Gradient-conflict alert text spacing
+
+The Appearance editor's alert that appears when a gradient is already applied to one color property rendered as:
+
+> A gradient is currently applied toBackground ColorYou can only apply gradients…
+
+Now reads properly with spaces and a period:
+
+> A gradient is currently applied to Background Color. You can only apply gradients…
+Content tab hidden for structure selections
+
+Selecting a section, row, or column used to show all three tabs — Content / Design / Advanced — but the Content tab just read "Select an element to edit its structure" since structure types have no content UI. Structure selections now show only Design · Advanced, with design defaulting. Element selections still show all three tabs.
+No auto-selection on template insert
+
+Inserting a section template via the Add Section modal used to auto-select the section, auto-open the settings panel, and flash all the edit overlays on. It now drops the section in silently — the canvas stays clean and the user selects deliberately.
+Click empty canvas to deselect
+
+Clicking anywhere on the dark gray margin around the canvas, or on empty space within the canvas itself, now clears every selection (element / column / row / section) and closes the settings panel. The prior implementation attached the handler only to one inner div and passed empty strings "" instead of null when clearing, which the isSettingsPanelOpen: id !== null check read as "still selected" — so clicking empty space did nothing. The handler is now attached to the three canvas wrapper layers (dark outer, centering wrapper, white canvas) and properly passes null to deselect. Clicks inside the right sidebar settings panel are unaffected, so editing values keeps the current selection intact.
+Gallery element fixed
+
+The gallery settings file opened with a stray escaped directive ("\"use client";) which broke the settings panel entirely when a gallery element was selected. Fixed. Unused enum members columns and container (renderer stubs with no editor and no template) were removed from ElementType to prevent accidental creation.
+Keyboard hook hardened
+
+The global Ctrl+Z / Ctrl+Y listener now checks contenteditable and skips when the user is inline-editing text (previously it hijacked the browser's native editor undo stack in contenteditable regions). The listener binds once on mount instead of rebinding on every store change.
+AI section generator
+
+The "Generate" prompt textarea was being reset to the literal string "untitled" after each generation cycle (copy-paste bug). It now resets to empty. The "Thumbs up / Needs work" feedback buttons in the generated-section preview were decorative — they now record the feedback and show a confirmation toast.
+Modal backdrop hardening
+
+The shared Modal component was closing on any mousedown outside the dialog, which meant dragging a text selection out of the modal would dismiss it mid-drag. Close now requires mousedown AND mouseup to land on the backdrop. Scroll-lock restore also now preserves the previous body.overflow value instead of hard-coding "auto".
